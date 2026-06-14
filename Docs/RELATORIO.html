@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Relatório Teórico — Lumen</title>
+<style>
+  @page { size: A4; margin: 22mm 20mm; }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", Calibri, Arial, sans-serif; color: #1c2230; font-size: 11.2pt; line-height: 1.55; }
+  h1, h2, h3 { color: #16224a; line-height: 1.2; }
+  h1 { font-size: 20pt; border-bottom: 3px solid #3a5bd0; padding-bottom: 6px; margin-top: 28px; }
+  h2 { font-size: 14pt; margin-top: 22px; border-left: 5px solid #3a5bd0; padding-left: 10px; }
+  h3 { font-size: 12pt; margin-top: 16px; color: #2a3a6a; }
+  p { text-align: justify; margin: 8px 0; }
+  code, .mono { font-family: "Consolas", "Courier New", monospace; background: #eef1fa; padding: 1px 5px; border-radius: 4px; font-size: 10pt; }
+  pre { background: #11162a; color: #e6ebff; padding: 12px 14px; border-radius: 8px; font-size: 9.5pt; overflow-x: auto; line-height: 1.4; }
+  pre code { background: none; color: inherit; padding: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 10.3pt; }
+  th, td { border: 1px solid #c3cbe6; padding: 6px 9px; text-align: left; vertical-align: top; }
+  th { background: #e8edfb; color: #16224a; }
+  .cover { text-align: center; height: 247mm; display: flex; flex-direction: column; justify-content: center; page-break-after: always; }
+  .cover .tag { letter-spacing: 3px; color: #3a5bd0; font-weight: 600; font-size: 12pt; }
+  .cover h1 { font-size: 40pt; border: none; margin: 6px 0; }
+  .cover .sub { font-size: 15pt; color: #444; margin-bottom: 40px; }
+  .cover .meta { font-size: 12pt; color: #333; margin-top: 60px; line-height: 1.9; }
+  .lead { background: #f3f6ff; border: 1px solid #d3ddf7; border-radius: 8px; padding: 12px 16px; }
+  ul { margin: 6px 0 6px 0; }
+  li { margin: 4px 0; }
+  .small { font-size: 9.5pt; color: #555; }
+  .badge { display:inline-block; background:#3a5bd0; color:#fff; border-radius: 20px; padding: 2px 12px; font-size: 9.5pt; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="tag">UNIFECAF • GAME DEVELOPMENT</div>
+  <h1>LUMEN</h1>
+  <div class="sub">Relatório Teórico — Desenvolvimento de um Jogo de Plataforma 2D na Unity</div>
+  <div class="meta">
+    <strong>Aluno:</strong> Samuel Nunes<br>
+    <strong>Disciplina:</strong> Game Development<br>
+    <strong>Engine:</strong> Unity 6 (6000.4) &nbsp;•&nbsp; <strong>Linguagem:</strong> C#<br>
+    <strong>Data:</strong> 14 de junho de 2026
+  </div>
+</div>
+
+<h1>1. Introdução e proposta do jogo</h1>
+<p class="lead"><strong>Lumen</strong> é um jogo de plataforma 2D em que o jogador controla uma pequena
+centelha de luz presa nas cavernas escuras do subsolo. Para escapar, ela precisa atravessar
+fendas e abismos, escalar cipós, desviar de espinhos e de criaturas das sombras, coletando
+<em>cristais de luz</em> que iluminam o caminho de volta à superfície. A narrativa é simples e
+serve de moldura temática: cada fase representa uma camada mais profunda — e mais perigosa — da
+caverna, e a "luz" no fim de cada nível é o portal para a próxima etapa da subida.</p>
+
+<p>Este relatório apresenta os fundamentos teóricos aplicados na construção do jogo e os conecta
+diretamente às decisões de implementação. O projeto foi desenvolvido na <strong>Unity 6</strong> com
+programação em <strong>C#</strong>, e tem como objetivo servir de peça de portfólio, demonstrando
+domínio da engine, lógica de mecânicas, design de níveis e experiência do usuário.</p>
+
+<h3>Referência de mercado</h3>
+<p>Como exemplo concreto de solução já consolidada no mercado, tomamos <strong>Celeste</strong>
+(Maddy Makes Games, 2018), um dos platformers 2D mais aclamados da última década. Celeste é
+referência justamente porque eleva ao máximo aquilo que estudamos: <em>movimento responsivo</em>,
+<em>mecânica de escalada</em>, <em>dificuldade crescente cuidadosamente dosada</em> e
+<em>feedback audiovisual imediato</em>. Vários recursos de "game feel" usados em Celeste — como o
+<em>coyote time</em> e o <em>pulo de altura variável</em> — foram reproduzidos em Lumen, conforme
+detalhado na Seção 6. Outras referências clássicas do gênero incluem <em>Super Mario Bros.</em>
+(Nintendo, 1985), que fundou a gramática do platformer, e <em>Hollow Knight</em> (Team Cherry, 2017),
+referência de atmosfera e exploração vertical.</p>
+
+<h1>2. Princípios de jogos de plataforma 2D</h1>
+<p>Um jogo de plataforma 2D é, em essência, um problema de <strong>navegação espacial sob física
+simulada</strong>: o personagem se desloca por um cenário composto de superfícies sólidas
+(plataformas), separadas por vãos, e o desafio nasce da combinação entre <em>gravidade</em>,
+<em>impulso de pulo</em> e <em>tempo de reação</em>. Os princípios centrais do gênero são:</p>
+<ul>
+  <li><strong>Gravidade e colisão:</strong> o personagem é constantemente puxado para baixo e só
+  para ao tocar uma superfície sólida. A detecção de chão precisa ser confiável.</li>
+  <li><strong>Controle responsivo ("game feel"):</strong> a sensação de controle é mais importante
+  que o realismo físico. Pequenas tolerâncias (coyote time, buffer de pulo) fazem o jogo parecer
+  "justo".</li>
+  <li><strong>Leitura visual clara:</strong> o jogador deve distinguir instantaneamente o que é
+  chão, perigo, coletável e inimigo. Em Lumen isso é resolvido com cores e silhuetas distintas
+  (chão com topo verde, cristais dourados, espinhos cinzas, inimigos roxos com olhos vermelhos).</li>
+  <li><strong>Risco e recompensa:</strong> caminhos perigosos costumam guardar mais coletáveis,
+  incentivando o domínio das mecânicas.</li>
+  <li><strong>Curva de aprendizado:</strong> cada habilidade é ensinada num contexto seguro antes
+  de ser cobrada em situações difíceis.</li>
+</ul>
+
+<h1>3. Planejamento do projeto e mecânicas propostas</h1>
+<p>O planejamento partiu dos requisitos obrigatórios (andar, correr, pular, escalar; 3 a 5 fases;
+HUD; feedback; arte; áudio) e de uma restrição de tempo agressiva. A decisão de arquitetura mais
+importante foi adotar uma abordagem <strong>"data-driven" e dirigida por código</strong>: em vez de
+montar manualmente cada cena no editor, o jogo inteiro é construído em tempo de execução a partir
+de dados (mapas de fase em texto) e de arte/áudio gerados proceduralmente. Isso reduziu o trabalho
+manual no editor a praticamente zero e tornou o resultado reprodutível em qualquer máquina.</p>
+
+<h3>Mecânicas implementadas</h3>
+<table>
+  <tr><th>Mecânica</th><th>Descrição</th><th>Tecla</th></tr>
+  <tr><td>Andar</td><td>Movimento horizontal em velocidade base.</td><td>← → ou A / D</td></tr>
+  <tr><td>Correr</td><td>Aumenta a velocidade, exigido para vencer vãos maiores.</td><td>Shift (segurar)</td></tr>
+  <tr><td>Pular</td><td>Pulo com altura variável e gravidade ajustada na queda.</td><td>Espaço</td></tr>
+  <tr><td>Escalar</td><td>Sobe/desce cipós, desativando a gravidade enquanto agarrado.</td><td>↑ ↓ ou W / S</td></tr>
+  <tr><td>Pisão</td><td>Derrota inimigos ao cair sobre eles, com pequeno repique.</td><td>(cair sobre o inimigo)</td></tr>
+</table>
+
+<h1>4. Abordagem de design de níveis com progressão de dificuldade</h1>
+<p>Foram criadas <strong>quatro fases</strong> com dificuldade crescente, cada uma introduzindo ou
+intensificando um desafio. Os níveis são descritos como <strong>mapas ASCII</strong> (uma matriz de
+caracteres), e um construtor (<code>LevelBuilder</code>) traduz cada símbolo em objetos do jogo.
+Essa técnica torna o design de fases rápido, legível e fácil de balancear.</p>
+
+<table>
+  <tr><th>Fase</th><th>Tema</th><th>Novidade / desafio</th></tr>
+  <tr><td>1 — Despertar</td><td>Tutorial</td><td>Terreno plano, ensina andar/pular/coletar; escada opcional de bônus.</td></tr>
+  <tr><td>2 — Fendas</td><td>Abismos</td><td>Fossos que exigem pulo; primeiros espinhos; escalada obrigatória até a saída.</td></tr>
+  <tr><td>3 — Abismo</td><td>Verticalidade</td><td>Mais fossos e inimigos; torre de escalada longa até a saída no alto.</td></tr>
+  <tr><td>4 — A Luz</td><td>Síntese</td><td>Combina tudo: muitos fossos, espinhos junto a saltos, vários inimigos e escalada final.</td></tr>
+</table>
+
+<p>A progressão segue o princípio de <em>"ensinar, depois testar"</em>: a Fase 1 apresenta cada
+elemento num ambiente sem punição; as fases seguintes recombinam esses elementos em densidade
+crescente. Os vãos foram limitados a 3 blocos de largura (sempre transponíveis com um pulo) e as
+plataformas posicionadas em alturas comprovadamente alcançáveis, garantindo que toda fase seja
+<strong>solucionável</strong>. Cristais em arco sobre os abismos recompensam o jogador que pula com
+precisão (risco e recompensa).</p>
+
+<h1>5. Conceitos de interatividade, HUD e feedback</h1>
+<p><strong>Interatividade</strong> é o ciclo entre a ação do jogador e a resposta do jogo. Quanto
+menor a latência e mais clara a resposta, melhor a experiência. Lumen oferece resposta imediata em
+três canais simultâneos: movimento do personagem, efeito visual e efeito sonoro.</p>
+
+<h3>HUD (Heads-Up Display)</h3>
+<p>O HUD foi construído por código com o sistema de UI da Unity (Canvas + Text) e exibe as três
+informações essenciais exigidas: <strong>vidas</strong> (ícone de coração), <strong>cristais
+coletados</strong> na fase (ícone de cristal, formato "atual / total") e <strong>pontuação</strong>.
+Há ainda um <em>banner</em> com o nome da fase no início de cada nível e mensagens centrais para
+"Fase Concluída", "Game Over" e "Você Venceu!".</p>
+
+<h3>Feedback</h3>
+<ul>
+  <li><strong>Visual:</strong> partículas douradas ao coletar cristal; piscar de invulnerabilidade
+  ao tomar dano; inimigo "achatado" ao ser pisado; portal de saída que pulsa.</li>
+  <li><strong>Sonoro:</strong> som distinto para pulo, coleta, dano, pisão, conclusão de fase e
+  vitória (ver Seção 7).</li>
+  <li><strong>Sistêmico:</strong> ao perder uma vida em queda, o jogador renasce no início da fase;
+  ao zerar as vidas, ocorre Game Over com opção de recomeçar (tecla R).</li>
+</ul>
+
+<h1>6. Lógica de programação em C# e estrutura do game loop</h1>
+<p>O código está organizado em <strong>17 scripts C#</strong> com responsabilidades bem definidas
+(princípio da responsabilidade única). Os principais são:</p>
+<table>
+  <tr><th>Script</th><th>Responsabilidade</th></tr>
+  <tr><td><code>Bootstrap</code></td><td>Ponto de entrada; inicia o jogo automaticamente ao carregar a cena.</td></tr>
+  <tr><td><code>GameManager</code></td><td>Singleton; controla vidas, pontuação, fases, vitória/derrota.</td></tr>
+  <tr><td><code>PlayerController</code></td><td>Mecânicas de movimento e animação do personagem.</td></tr>
+  <tr><td><code>LevelData</code> / <code>LevelBuilder</code></td><td>Dados das fases (ASCII) e sua construção em objetos.</td></tr>
+  <tr><td><code>Enemy</code>, <code>Collectible</code>, <code>Hazard</code>, <code>LevelExit</code>, <code>Ladder</code></td><td>Comportamentos dos elementos da fase.</td></tr>
+  <tr><td><code>HUDController</code></td><td>Interface do usuário.</td></tr>
+  <tr><td><code>AudioManager</code></td><td>Síntese de áudio (trilha e efeitos).</td></tr>
+  <tr><td><code>SpriteFactory</code> / <code>SpriteAnimator</code></td><td>Geração e animação de sprites.</td></tr>
+  <tr><td><code>CameraFollow</code></td><td>Câmera que segue o jogador dentro dos limites da fase.</td></tr>
+</table>
+
+<h3>O game loop na Unity</h3>
+<p>A Unity executa um <em>game loop</em> em que, a cada quadro, são chamados métodos de ciclo de
+vida dos componentes. O projeto separa corretamente as responsabilidades entre eles:</p>
+<ul>
+  <li><code>Update()</code> — leitura de entrada e lógica por quadro (a cada frame).</li>
+  <li><code>FixedUpdate()</code> — física e movimento (passo de tempo fixo), evitando que a jogabilidade
+  dependa da taxa de quadros.</li>
+  <li><code>LateUpdate()</code> — movimento da câmera, executado após tudo se mover.</li>
+</ul>
+
+<p>Para alcançar um controle "justo", o <code>PlayerController</code> implementa técnicas
+profissionais de <em>game feel</em>:</p>
+<pre><code>// Coyote time: ainda é possível pular por um breve instante após sair da borda
+if (_grounded) _coyoteTimer = coyoteTime;
+else if (_coyoteTimer > 0f) _coyoteTimer -= Time.fixedDeltaTime;
+
+// Jump buffer: registra o pulo um instante antes de tocar o chão
+if (_bufferTimer > 0f &amp;&amp; _coyoteTimer > 0f) DoJump();
+
+// Gravidade aumentada na queda e pulo curto ao soltar o botão
+if (_rb.linearVelocity.y &lt; 0f)
+    _rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1f) * Time.fixedDeltaTime;</code></pre>
+
+<p>A detecção de chão usa <code>Physics2D.OverlapBox</code> sob os pés do personagem, e a
+identificação dos elementos (cristal, inimigo, perigo) é feita por <em>tipo de componente</em> em
+vez de <em>tags</em>, o que torna o sistema mais robusto. O padrão <strong>Singleton</strong> no
+<code>GameManager</code> e no <code>AudioManager</code> dá acesso global e centralizado ao estado do
+jogo e ao áudio.</p>
+
+<h1>7. Estratégias de inserção de áudio e efeitos sonoros</h1>
+<p>Todo o áudio de Lumen é <strong>sintetizado por código</strong> em tempo de execução, sem
+arquivos externos. O <code>AudioManager</code> gera formas de onda (principalmente onda quadrada,
+estilo "chiptune") e as converte em <code>AudioClip</code> via <code>AudioClip.Create</code> +
+<code>SetData</code>. Cada evento de jogo dispara um som característico:</p>
+<table>
+  <tr><th>Evento</th><th>Som</th></tr>
+  <tr><td>Pulo</td><td>Varredura de frequência ascendente, curta.</td></tr>
+  <tr><td>Coleta de cristal</td><td>Dois tons agudos ("bling").</td></tr>
+  <tr><td>Dano</td><td>Varredura descendente com ruído.</td></tr>
+  <tr><td>Pisão em inimigo</td><td>Tom grave curto.</td></tr>
+  <tr><td>Fase concluída / Vitória</td><td>Arpejo ascendente.</td></tr>
+</table>
+<p>A <strong>trilha sonora</strong> é um loop melódico em Lá menor pentatônica, com uma linha de
+baixo seguindo a progressão Am–F–C–G, em volume reduzido para ficar em segundo plano. A escolha por
+áudio procedural garante coerência com a estética "digital/luminosa" do jogo e elimina dependências
+de assets. Um pequeno <em>fade</em> nas pontas do loop evita estalos na repetição. A tecla
+<span class="mono">M</span> ativa/desativa o som.</p>
+
+<h1>8. Uso de assets, sprites e animações na Unity</h1>
+<p>A arte de Lumen é <strong>original e gerada por código</strong> (procedural). A
+<code>SpriteFactory</code> desenha cada sprite pixel a pixel em uma <code>Texture2D</code> (16×16)
+e a converte em <code>Sprite</code> com filtro <em>Point</em>, resultando em uma estética
+<em>pixel art</em> limpa. São gerados: o personagem (com quadros de parado, andar, pular e escalar),
+inimigos, cristais (com brilho de giro), blocos de cenário, escadas, espinhos, o portal de saída e
+o fundo com estrelas.</p>
+
+<h3>Animação</h3>
+<p>As animações usam <strong>troca de quadros</strong> (sprite-sheet animation) — a mesma técnica
+por trás da ferramenta de Animação da Unity, porém dirigida por um componente próprio
+(<code>SpriteAnimator</code>) que troca o <code>Sprite</code> do <code>SpriteRenderer</code> em uma
+taxa definida. O <code>PlayerController</code> seleciona a animação conforme o estado físico
+(parado, andando, correndo, pulando, caindo, escalando), e a velocidade da animação de caminhada
+aumenta ao correr, reforçando a leitura de movimento.</p>
+
+<p class="small"><strong>Créditos de assets:</strong> toda a arte e todo o áudio foram criados
+proceduralmente pelo próprio código do projeto (arte e som originais). A fonte de texto do HUD é a
+fonte interna da Unity (<code>LegacyRuntime.ttf</code>). Caso se optasse por assets externos
+gratuitos, o pacote <em>Kenney Platformer Pack</em> (kenney.nl, licença CC0) seria a referência
+recomendada e exigiria atribuição de crédito.</p>
+
+<h1>9. Conexão entre teoria e prática</h1>
+<p>A tabela a seguir resume como cada conceito teórico se materializou no código do jogo:</p>
+<table>
+  <tr><th>Conceito teórico</th><th>Aplicação prática em Lumen</th></tr>
+  <tr><td>Game feel / controle responsivo</td><td>Coyote time, jump buffer e gravidade variável no <code>PlayerController</code>.</td></tr>
+  <tr><td>Física de plataforma</td><td><code>Rigidbody2D</code> + detecção de chão por <code>OverlapBox</code>.</td></tr>
+  <tr><td>Progressão de dificuldade</td><td>Quatro mapas ASCII com elementos recombinados em densidade crescente.</td></tr>
+  <tr><td>Interatividade e feedback</td><td>Resposta visual (partículas), sonora (SFX) e sistêmica (vidas/respawn) imediata.</td></tr>
+  <tr><td>HUD</td><td>Canvas com vidas, cristais e pontuação atualizados por eventos.</td></tr>
+  <tr><td>Game loop</td><td>Uso correto de <code>Update</code>/<code>FixedUpdate</code>/<code>LateUpdate</code>.</td></tr>
+  <tr><td>Arquitetura de software</td><td>Singletons, responsabilidade única e abordagem data-driven.</td></tr>
+  <tr><td>Áudio</td><td>Síntese procedural de trilha e efeitos coerentes com a estética.</td></tr>
+</table>
+
+<h2>Conclusão</h2>
+<p>O desenvolvimento de Lumen demonstrou, na prática, que um jogo de plataforma 2D funcional e
+agradável depende menos de recursos sofisticados e mais da aplicação cuidadosa de princípios
+fundamentais: controle responsivo, leitura visual clara, progressão de dificuldade bem dosada e
+feedback imediato. A abordagem dirigida por código e por dados, somada à geração procedural de arte
+e áudio, permitiu entregar uma experiência completa, reprodutível e tecnicamente organizada,
+adequada como peça de portfólio.</p>
+
+<h3>Referências</h3>
+<p class="small">
+Unity Technologies. <em>Unity Learn — Get Started</em>. Disponível em: unity.com/learn.<br>
+Maddy Makes Games. <em>Celeste</em>, 2018 (referência de game feel e mecânica de escalada).<br>
+Nintendo. <em>Super Mario Bros.</em>, 1985 (fundamentos do gênero plataforma).<br>
+Team Cherry. <em>Hollow Knight</em>, 2017 (atmosfera e exploração vertical).<br>
+Kenney. <em>Game Assets (CC0)</em>. Disponível em: kenney.nl/assets.
+</p>
+
+</body>
+</html>
