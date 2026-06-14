@@ -139,10 +139,10 @@ public class GameManager : MonoBehaviour
         _hud.SetAmmo(_player.HasWeapon, _player.Ammo);
         _hud.ShowBoss(false);
         _hud.HideCenter();
-        _hud.ShowBanner("Fase " + (index + 1) + " — " + LevelData.Names[index]);
+        _hud.ShowBanner("FASE " + LevelData.Names[index]);
         // so mostro a dica de controles na primeira fase pra nao poluir o resto
         _hud.SetHint(index == 0
-            ? "Setas/A-D: mover  |  Shift: correr  |  Espaco: pular  |  Cima/Baixo: escalar  |  J: atirar"
+            ? "Setas/WASD: mover  |  Shift: correr  |  Espaco/W: pular  |  Cima/Baixo: escalar  |  J: atirar"
             : "");
     }
 

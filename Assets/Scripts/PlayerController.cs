@@ -45,22 +45,14 @@ public class PlayerController : MonoBehaviour
     bool _control = true;
     bool _fell;
 
-    // o sprite fica num objeto filho pra eu poder usar a arte da Luna
-    Transform _visual;
-    bool _useCustom;
-    float _visBaseY;
-    Vector3 _visBaseScale = Vector3.one;
-
     public Vector2 Velocity => _rb.linearVelocity;
 
     void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
         _col = GetComponent<BoxCollider2D>();
-        _sr = GetComponentInChildren<SpriteRenderer>();
-        _anim = GetComponentInChildren<SpriteAnimator>();
-
-        SetupVisual();
+        _sr = GetComponent<SpriteRenderer>();
+        _anim = GetComponent<SpriteAnimator>();
 
         _rb.gravityScale = gravityScale;
         _rb.freezeRotation = true;
@@ -96,8 +88,13 @@ public class PlayerController : MonoBehaviour
 
         _runHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
-        if (Input.GetKeyDown(KeyCode.Space)) _bufferTimer = jumpBuffer;
-        _jumpHeld = Input.GetKey(KeyCode.Space);
+        // pulo no espaço; deixei o W e a seta pra cima pularem tbm (costume de WASD),
+        // mas so quando NAO ta na escada, senao o W ia pular em vez de subir
+        bool jumpKey = Input.GetKeyDown(KeyCode.Space)
+            || ((Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) && _ladderCount == 0);
+        if (jumpKey) _bufferTimer = jumpBuffer;
+        _jumpHeld = Input.GetKey(KeyCode.Space)
+            || ((Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) && _ladderCount == 0);
 
         if (_bufferTimer > 0f) _bufferTimer -= Time.deltaTime;
 
@@ -195,43 +192,8 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void SetupVisual()
-    {
-        if (_sr == null) return;
-        _visual = _sr.transform;
-        var luna = Resources.Load<Sprite>("luna");
-        if (luna != null)
-        {
-            _useCustom = true;
-            if (_anim != null) _anim.enabled = false;
-            _sr.sprite = luna;
-            if (luna.texture != null) luna.texture.filterMode = FilterMode.Point; // point pra nao borrar o pixel art
-            float target = 1.5f; // altura que eu quero que ela tenha
-            float s = target / luna.bounds.size.y;
-            _visBaseScale = new Vector3(s, s, 1f);
-            float colBottom = _col.offset.y - _col.size.y / 2f;
-            _visBaseY = colBottom + target / 2f; // calculo pra deixar o pe dela encostando no chao
-            _visual.localScale = _visBaseScale;
-            _visual.localPosition = new Vector3(0f, _visBaseY, 0f);
-        }
-    }
-
-    // como a Luna nao tem varios frames, faco a animacao mexendo no transform mesmo (sobe/desce e estica)
-    void CustomVisual()
-    {
-        float bob = 0f, stretchY = 1f, squashX = 1f;
-        if (_climbing) bob = Mathf.Sin(Time.time * 8f) * 0.05f;
-        else if (!_grounded) { stretchY = 1.08f; squashX = 0.94f; }
-        else if (Mathf.Abs(_rb.linearVelocity.x) > 0.3f) bob = Mathf.Abs(Mathf.Sin(Time.time * 12f)) * 0.07f;
-        else bob = Mathf.Sin(Time.time * 3f) * 0.03f;
-        _visual.localPosition = new Vector3(0f, _visBaseY + bob, 0f);
-        _visual.localScale = new Vector3(_visBaseScale.x * squashX, _visBaseScale.y * stretchY, 1f);
-    }
-
     void UpdateAnimation()
     {
-        if (_sr == null) return;
-        if (_useCustom) { CustomVisual(); return; }
         if (_anim == null) return;
 
         if (_climbing)

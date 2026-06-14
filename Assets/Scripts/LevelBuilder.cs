@@ -192,14 +192,10 @@ public static class LevelBuilder
         col.size = new Vector2(0.6f, 0.85f);
         col.offset = new Vector2(0f, -0.05f);
 
-        // deixo o visual num filho separado, ai da pra trocar/escalar o sprite (a Luna) sem mexer no colisor
-        var vis = new GameObject("Visual");
-        vis.transform.SetParent(go.transform);
-        vis.transform.localPosition = Vector3.zero;
-        var sr = vis.AddComponent<SpriteRenderer>();
+        var sr = go.AddComponent<SpriteRenderer>();
         sr.sortingOrder = 10;
         sr.sprite = SpriteFactory.PlayerIdle()[0];
-        vis.AddComponent<SpriteAnimator>();
+        go.AddComponent<SpriteAnimator>();
 
         go.AddComponent<PlayerController>();
         return go;

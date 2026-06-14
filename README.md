@@ -1,26 +1,26 @@
-# 🌆 Lumen — Plataforma 2D Cyberpunk
+# 🌆 Lumen - Plataforma 2D Cyberpunk
 
-> Projeto da disciplina **Game Development** — UniFECAF
+> Projeto da disciplina **Game Development** - UniFECAF
 > Desenvolvido em **Unity 6 (6000.4)** com **C#** por **Samuel Nunes**
 
 **Lumen** é um jogo de plataforma 2D de estética **cyberpunk** (neon synthwave). Você controla
 um pequeno *netrunner* de luz que precisa atravessar os níveis de uma megacidade subterrânea:
 saltando por abismos, escalando, coletando **data-shards**, pegando **armas** para atirar em
-**drones** e bots de segurança — até enfrentar o **MAINFRAME**, o chefe final, numa arena.
+**drones** e bots de segurança - até enfrentar o **MAINFRAME**, o chefe final, numa arena.
 Cada fase tem um **céu de cor diferente** que pulsa em neon conforme você avança.
 
-![Lumen — Menu](Docs/screenshots/menu.png)
-![Lumen — Fase 1](Docs/screenshots/fase_1.png)
-![Lumen — Chefe MAINFRAME](Docs/screenshots/boss.png)
+![Lumen - Menu](Docs/screenshots/menu.png)
+![Lumen - Fase 1](Docs/screenshots/fase_1.png)
+![Lumen - Chefe MAINFRAME](Docs/screenshots/boss.png)
 
 ---
 
 ## 🎮 Mecânicas
 
 - **Andar** e **correr** (movimento horizontal responsivo)
-- **Pular** (com *coyote time*, *jump buffer* e altura variável — sensação de controle "justo")
+- **Pular** (com *coyote time*, *jump buffer* e altura variável - sensação de controle "justo")
 - **Escalar** cipós/escadas (a gravidade é desativada enquanto agarrado)
-- **Atirar** — pegue uma **arma** (dropada por inimigos ou espalhada nas fases) e dispare projéteis neon
+- **Atirar** - pegue uma **arma** (dropada por inimigos ou espalhada nas fases) e dispare projéteis neon
 - **Pisar** em inimigos para derrotá-los
 - **Drones voadores** e bots de segurança como inimigos
 - **Chefe final (MAINFRAME)** com barra de vida própria, que se move e atira
@@ -36,7 +36,7 @@ Cada fase tem um **céu de cor diferente** que pulsa em neon conforme você avan
 | Escolher dificuldade (menu) | `1` `2` `3` |
 | Mover | `←` `→` ou `A` `D` |
 | Correr | segurar `Shift` |
-| Pular | `Espaço` |
+| Pular | `Espaço`, `W` ou `↑` |
 | Escalar (em escadas) | `↑` `↓` ou `W` `S` |
 | **Atirar** | `J` ou clique esquerdo |
 | Reiniciar (após Game Over / Vitória) | `R` |
@@ -47,21 +47,21 @@ Cada fase tem um **céu de cor diferente** que pulsa em neon conforme você avan
 
 São **5 fases** com dificuldade crescente:
 
-1. **Boot** — tutorial em terreno plano; primeira arma e drone.
-2. **Submundo** — abismos para pular, espinhos e escalada obrigatória.
-3. **Arranha-Céu** — verticalidade, drones e uma torre de escalada longa.
-4. **O Núcleo** — combina todos os desafios em densidade máxima.
-5. **MAINFRAME** — arena do **chefe final**: pegue armas, desvie dos tiros e destrua o boss.
+1. **Boot** - tutorial em terreno plano; primeira arma e drone.
+2. **Submundo** - abismos para pular, espinhos e escalada obrigatória.
+3. **Arranha-Céu** - verticalidade, drones e uma torre de escalada longa.
+4. **O Núcleo** - combina todos os desafios em densidade máxima.
+5. **MAINFRAME** - arena do **chefe final**: pegue armas, desvie dos tiros e destrua o boss.
 
 ---
 
 ## ▶️ Como jogar
 
-### Opção 1 — Executável (Windows)
+### Opção 1 - Executável (Windows)
 1. Baixe/extraia a pasta `Build/`.
 2. Execute **`Lumen.exe`**.
 
-### Opção 2 — No editor Unity
+### Opção 2 - No editor Unity
 1. Abra o projeto no **Unity 6 (6000.4.11f1)** via Unity Hub (*Add project from disk*).
 2. Abra a cena `Assets/Scenes/SampleScene.unity`.
 3. Pressione **Play**.
@@ -126,4 +126,4 @@ Lumen/
 
 ---
 
-*Projeto acadêmico — UniFECAF, 2026.*
+*Projeto acadêmico - UniFECAF, 2026.*

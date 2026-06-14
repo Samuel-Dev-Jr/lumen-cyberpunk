@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Relatório Teórico — Lumen</title>
+<title>Relatório Teórico - Lumen</title>
 <style>
   @page { size: A4; margin: 22mm 20mm; }
   * { box-sizing: border-box; }
@@ -35,7 +35,7 @@
 <div class="cover">
   <div class="tag">UNIFECAF • GAME DEVELOPMENT</div>
   <h1>LUMEN</h1>
-  <div class="sub">Relatório Teórico — Plataforma 2D Cyberpunk na Unity</div>
+  <div class="sub">Relatório Teórico - Plataforma 2D Cyberpunk na Unity</div>
   <div class="meta">
     <strong>Aluno:</strong> Samuel Nunes<br>
     <strong>Disciplina:</strong> Game Development<br>
@@ -45,43 +45,44 @@
 </div>
 
 <h1>1. Introdução e proposta do jogo</h1>
-<p class="lead"><strong>Lumen</strong> é um jogo de plataforma 2D com estética <strong>cyberpunk</strong>
-(neon synthwave). O jogador controla um pequeno <em>netrunner</em> de luz que precisa atravessar
-os níveis de uma megacidade subterrânea: saltando por abismos, escalando, coletando
-<em>data-shards</em>, pegando <em>armas</em> para atirar em drones e bots de segurança, até
-enfrentar o <strong>MAINFRAME</strong> — o chefe final — em uma arena. A cada fase, o céu da
-cidade muda de cor e pulsa em neon, reforçando a progressão e a atmosfera.</p>
+<p class="lead">Neste relatório eu apresento o <strong>Lumen</strong>, o jogo de plataforma 2D que
+desenvolvi para a disciplina, com uma estética <strong>cyberpunk</strong> (neon synthwave). A
+protagonista é a <strong>Luna</strong>, que precisa atravessar os níveis de uma megacidade futurista:
+saltando por abismos, escalando, coletando <em>data-shards</em>, pegando <em>armas</em> para atirar em
+drones e bots de segurança, até enfrentar o <strong>MAINFRAME</strong> (o chefe final) numa arena. A
+cada fase, o céu da cidade muda de cor e pisca em neon, o que ajuda a passar a ideia de progressão.</p>
 
-<p>Este relatório apresenta os fundamentos teóricos aplicados na construção do jogo e os conecta
-diretamente às decisões de implementação. O projeto foi desenvolvido na <strong>Unity 6</strong> com
-programação em <strong>C#</strong>, e tem como objetivo servir de peça de portfólio, demonstrando
-domínio da engine, lógica de mecânicas, design de níveis e experiência do usuário.</p>
+<p>Aqui eu explico os fundamentos teóricos que apliquei no jogo e ligo cada um deles às decisões que
+tomei na prática. Fiz tudo na <strong>Unity 6</strong> com <strong>C#</strong>, com a ideia de usar o
+projeto como peça de portfólio, mostrando o que aprendi de engine, lógica das mecânicas, design de
+níveis e experiência do usuário.</p>
 
 <h3>Referência de mercado</h3>
 <p>Como exemplo concreto de solução já consolidada no mercado, tomamos <strong>Celeste</strong>
 (Maddy Makes Games, 2018), um dos platformers 2D mais aclamados da última década. Celeste é
 referência justamente porque eleva ao máximo aquilo que estudamos: <em>movimento responsivo</em>,
 <em>mecânica de escalada</em>, <em>dificuldade crescente cuidadosamente dosada</em> e
-<em>feedback audiovisual imediato</em>. Vários recursos de "game feel" usados em Celeste — como o
-<em>coyote time</em> e o <em>pulo de altura variável</em> — foram reproduzidos em Lumen, conforme
+<em>feedback audiovisual imediato</em>. Vários recursos de "game feel" usados em Celeste - como o
+<em>coyote time</em> e o <em>pulo de altura variável</em> - foram reproduzidos em Lumen, conforme
 detalhado na Seção 6. Outras referências clássicas do gênero incluem <em>Super Mario Bros.</em>
 (Nintendo, 1985), que fundou a gramática do platformer, e <em>Hollow Knight</em> (Team Cherry, 2017),
 referência de atmosfera e exploração vertical.</p>
 
 <h1>2. Princípios de jogos de plataforma 2D</h1>
-<p>Um jogo de plataforma 2D é, em essência, um problema de <strong>navegação espacial sob física
-simulada</strong>: o personagem se desloca por um cenário composto de superfícies sólidas
-(plataformas), separadas por vãos, e o desafio nasce da combinação entre <em>gravidade</em>,
-<em>impulso de pulo</em> e <em>tempo de reação</em>. Os princípios centrais do gênero são:</p>
+<p>No fundo, um jogo de plataforma 2D é um desafio de movimento e física: o personagem anda por um
+cenário cheio de superfícies sólidas (as plataformas), separadas por vãos, e a graça vem da mistura
+de <em>gravidade</em>, <em>impulso de pulo</em> e <em>tempo de reação</em>. Os principais princípios
+do gênero que estudei foram:</p>
 <ul>
   <li><strong>Gravidade e colisão:</strong> o personagem é constantemente puxado para baixo e só
   para ao tocar uma superfície sólida. A detecção de chão precisa ser confiável.</li>
   <li><strong>Controle responsivo ("game feel"):</strong> a sensação de controle é mais importante
   que o realismo físico. Pequenas tolerâncias (coyote time, buffer de pulo) fazem o jogo parecer
   "justo".</li>
-  <li><strong>Leitura visual clara:</strong> o jogador deve distinguir instantaneamente o que é
-  chão, perigo, coletável e inimigo. Em Lumen isso é resolvido com cores e silhuetas distintas
-  (chão com topo verde, cristais dourados, espinhos cinzas, inimigos roxos com olhos vermelhos).</li>
+  <li><strong>Leitura visual clara:</strong> o jogador precisa bater o olho e já saber o que é
+  chão, perigo, coletável e inimigo. No Lumen eu resolvi isso com cores neon bem diferentes entre si
+  (faixa ciano no topo do chão, data-shards cianos brilhando, espinhos magenta e inimigos escuros
+  com olhos vermelhos).</li>
   <li><strong>Risco e recompensa:</strong> caminhos perigosos costumam guardar mais coletáveis,
   incentivando o domínio das mecânicas.</li>
   <li><strong>Curva de aprendizado:</strong> cada habilidade é ensinada num contexto seguro antes
@@ -89,19 +90,19 @@ simulada</strong>: o personagem se desloca por um cenário composto de superfíc
 </ul>
 
 <h1>3. Planejamento do projeto e mecânicas propostas</h1>
-<p>O planejamento partiu dos requisitos obrigatórios (andar, correr, pular, escalar; 3 a 5 fases;
-HUD; feedback; arte; áudio) e de uma restrição de tempo agressiva. A decisão de arquitetura mais
-importante foi adotar uma abordagem <strong>"data-driven" e dirigida por código</strong>: em vez de
-montar manualmente cada cena no editor, o jogo inteiro é construído em tempo de execução a partir
-de dados (mapas de fase em texto) e de arte/áudio gerados proceduralmente. Isso reduziu o trabalho
-manual no editor a praticamente zero e tornou o resultado reprodutível em qualquer máquina.</p>
+<p>Comecei o planejamento listando os requisitos obrigatórios (andar, correr, pular, escalar; de 3 a
+5 fases; HUD; feedback; arte; áudio) e tendo em mente o tempo curto que eu tinha. A decisão mais
+importante que tomei foi montar tudo de forma <strong>dirigida por código</strong>: em vez de ficar
+arrastando objeto por objeto no editor, o jogo inteiro é construído na hora a partir de dados (os
+mapas de fase em texto) e de arte/áudio gerados por código. Isso quase zerou o trabalho manual no
+editor e fez o projeto rodar em qualquer máquina sem depender de arquivos externos.</p>
 
 <h3>Mecânicas implementadas</h3>
 <table>
   <tr><th>Mecânica</th><th>Descrição</th><th>Tecla</th></tr>
   <tr><td>Andar</td><td>Movimento horizontal em velocidade base.</td><td>← → ou A / D</td></tr>
   <tr><td>Correr</td><td>Aumenta a velocidade, exigido para vencer vãos maiores.</td><td>Shift (segurar)</td></tr>
-  <tr><td>Pular</td><td>Pulo com altura variável e gravidade ajustada na queda.</td><td>Espaço</td></tr>
+  <tr><td>Pular</td><td>Pulo com altura variável e gravidade ajustada na queda.</td><td>Espaço / W</td></tr>
   <tr><td>Escalar</td><td>Sobe/desce cipós, desativando a gravidade enquanto agarrado.</td><td>↑ ↓ ou W / S</td></tr>
   <tr><td>Atirar</td><td>Após pegar uma arma, dispara projéteis neon na direção atual.</td><td>J ou clique</td></tr>
   <tr><td>Pisão</td><td>Derrota inimigos ao cair sobre eles, com pequeno repique.</td><td>(cair sobre o inimigo)</td></tr>
@@ -118,11 +119,11 @@ Essa técnica torna o design de fases rápido, legível e fácil de balancear.</
 
 <table>
   <tr><th>Fase</th><th>Tema</th><th>Novidade / desafio</th></tr>
-  <tr><td>1 — Boot</td><td>Tutorial</td><td>Terreno plano; ensina andar/pular/coletar; primeira arma e drone.</td></tr>
-  <tr><td>2 — Submundo</td><td>Abismos</td><td>Fossos que exigem pulo; primeiros espinhos; escalada obrigatória.</td></tr>
-  <tr><td>3 — Arranha-Céu</td><td>Verticalidade</td><td>Mais fossos, drones e uma torre de escalada longa.</td></tr>
-  <tr><td>4 — O Núcleo</td><td>Síntese</td><td>Combina tudo: muitos fossos, espinhos junto a saltos, vários inimigos.</td></tr>
-  <tr><td>5 — MAINFRAME</td><td>Chefe</td><td>Arena do chefe final: pegar armas, desviar de tiros e destruir o boss.</td></tr>
+  <tr><td>1 - Boot</td><td>Tutorial</td><td>Terreno plano; ensina andar/pular/coletar; primeira arma e drone.</td></tr>
+  <tr><td>2 - Submundo</td><td>Abismos</td><td>Fossos que exigem pulo; primeiros espinhos; escalada obrigatória.</td></tr>
+  <tr><td>3 - Arranha-Céu</td><td>Verticalidade</td><td>Mais fossos, drones e uma torre de escalada longa.</td></tr>
+  <tr><td>4 - O Núcleo</td><td>Síntese</td><td>Combina tudo: muitos fossos, espinhos junto a saltos, vários inimigos.</td></tr>
+  <tr><td>5 - MAINFRAME</td><td>Chefe</td><td>Arena do chefe final: pegar armas, desviar de tiros e destruir o boss.</td></tr>
 </table>
 
 <p>A progressão segue o princípio de <em>"ensinar, depois testar"</em>: a Fase 1 apresenta cada
@@ -175,10 +176,10 @@ definidas (princípio da responsabilidade única). Os principais são:</p>
 <p>A Unity executa um <em>game loop</em> em que, a cada quadro, são chamados métodos de ciclo de
 vida dos componentes. O projeto separa corretamente as responsabilidades entre eles:</p>
 <ul>
-  <li><code>Update()</code> — leitura de entrada e lógica por quadro (a cada frame).</li>
-  <li><code>FixedUpdate()</code> — física e movimento (passo de tempo fixo), evitando que a jogabilidade
+  <li><code>Update()</code> - leitura de entrada e lógica por quadro (a cada frame).</li>
+  <li><code>FixedUpdate()</code> - física e movimento (passo de tempo fixo), evitando que a jogabilidade
   dependa da taxa de quadros.</li>
-  <li><code>LateUpdate()</code> — movimento da câmera, executado após tudo se mover.</li>
+  <li><code>LateUpdate()</code> - movimento da câmera, executado após tudo se mover.</li>
 </ul>
 
 <p>Para alcançar um controle "justo", o <code>PlayerController</code> implementa técnicas
@@ -216,7 +217,7 @@ estilo "chiptune") e as converte em <code>AudioClip</code> via <code>AudioClip.C
   <tr><td>Fase concluída / Vitória</td><td>Arpejo ascendente.</td></tr>
 </table>
 <p>A <strong>trilha sonora</strong> é um loop melódico em Lá menor pentatônica, com uma linha de
-baixo seguindo a progressão Am–F–C–G, em volume reduzido para ficar em segundo plano. A escolha por
+baixo seguindo a progressão Am-F-C-G, em volume reduzido para ficar em segundo plano. A escolha por
 áudio procedural garante coerência com a estética "digital/luminosa" do jogo e elimina dependências
 de assets. Um pequeno <em>fade</em> nas pontas do loop evita estalos na repetição. A tecla
 <span class="mono">M</span> ativa/desativa o som.</p>
@@ -233,7 +234,7 @@ projéteis, lajes com faixa neon, escadas, espinhos de energia, o portal de saí
 fase (com <em>flicker</em> neon controlado pelo <code>SkyController</code>).</p>
 
 <h3>Animação</h3>
-<p>As animações usam <strong>troca de quadros</strong> (sprite-sheet animation) — a mesma técnica
+<p>As animações usam <strong>troca de quadros</strong> (sprite-sheet animation) - a mesma técnica
 por trás da ferramenta de Animação da Unity, porém dirigida por um componente próprio
 (<code>SpriteAnimator</code>) que troca o <code>Sprite</code> do <code>SpriteRenderer</code> em uma
 taxa definida. O <code>PlayerController</code> seleciona a animação conforme o estado físico
@@ -261,16 +262,16 @@ recomendada e exigiria atribuição de crédito.</p>
 </table>
 
 <h2>Conclusão</h2>
-<p>O desenvolvimento de Lumen demonstrou, na prática, que um jogo de plataforma 2D funcional e
-agradável depende menos de recursos sofisticados e mais da aplicação cuidadosa de princípios
-fundamentais: controle responsivo, leitura visual clara, progressão de dificuldade bem dosada e
-feedback imediato. A abordagem dirigida por código e por dados, somada à geração procedural de arte
-e áudio, permitiu entregar uma experiência completa, reprodutível e tecnicamente organizada,
-adequada como peça de portfólio.</p>
+<p>Fazendo o Lumen eu percebi, na prática, que um jogo de plataforma 2D legal de jogar depende menos
+de recurso sofisticado e mais de caprichar no básico: controle responsivo, leitura visual clara,
+dificuldade bem dosada e feedback na hora. Pra mim, o que mais valeu foi montar o jogo de forma
+dirigida por código e gerar a arte e o áudio por conta própria - no começo deu trabalho (a parte da
+física do pulo e da colisão me deu uns nós), mas no fim consegui entregar uma experiência completa,
+que roda em qualquer PC e que eu fico tranquilo de mostrar como portfólio.</p>
 
 <h3>Referências</h3>
 <p class="small">
-Unity Technologies. <em>Unity Learn — Get Started</em>. Disponível em: unity.com/learn.<br>
+Unity Technologies. <em>Unity Learn - Get Started</em>. Disponível em: unity.com/learn.<br>
 Maddy Makes Games. <em>Celeste</em>, 2018 (referência de game feel e mecânica de escalada).<br>
 Askiisoft. <em>Katana ZERO</em>, 2019 (estética neon/synthwave e ação 2D).<br>
 CD Projekt RED. <em>Cyberpunk 2077</em>, 2020 (referência estética do tema cyberpunk).<br>
