@@ -30,6 +30,17 @@ public static class LevelBuilder
             maxY = rows,
         };
 
+        // Todos os blocos de chão entram em UM ÚNICO colisor (CompositeCollider2D).
+        // Isso elimina as "emendas" entre blocos onde o personagem travava ao andar/pular.
+        var groundGO = new GameObject("Ground");
+        groundGO.transform.SetParent(parent);
+        var grb = groundGO.AddComponent<Rigidbody2D>();
+        grb.bodyType = RigidbodyType2D.Static;
+        var comp = groundGO.AddComponent<CompositeCollider2D>();
+        comp.geometryType = CompositeCollider2D.GeometryType.Polygons;
+        comp.generationType = CompositeCollider2D.GenerationType.Manual;
+        Transform groundT = groundGO.transform;
+
         for (int row = 0; row < rows; row++)
         {
             string line = map[row];
@@ -42,7 +53,7 @@ public static class LevelBuilder
 
                 switch (c)
                 {
-                    case '#': MakeTile(x, y, IsTopTile(map, row, col), parent); break;
+                    case '#': MakeTile(x, y, IsTopTile(map, row, col), groundT); break;
                     case 'H': MakeLadder(x, y, parent); break;
                     case 'o': MakeCrystal(x, y, parent); info.crystals++; break;
                     case '^': MakeSpike(x, y, parent); break;
@@ -54,6 +65,8 @@ public static class LevelBuilder
                 }
             }
         }
+
+        comp.GenerateGeometry(); // gera o colisor unico do chão
 
         info.player = MakePlayer(info.playerStart, parent);
         info.player.GetComponent<PlayerController>().killY = info.minY - 8f;
@@ -80,12 +93,13 @@ public static class LevelBuilder
         return go;
     }
 
-    static void MakeTile(float x, float y, bool grassTop, Transform parent)
+    static void MakeTile(float x, float y, bool grassTop, Transform groundParent)
     {
-        var go = NewObj("Tile", x, y, parent, 0);
+        var go = NewObj("Tile", x, y, groundParent, 0);
         go.GetComponent<SpriteRenderer>().sprite = SpriteFactory.Tile(grassTop);
         var col = go.AddComponent<BoxCollider2D>();
         col.size = Vector2.one;
+        col.usedByComposite = true; // funde com o CompositeCollider2D do chão
     }
 
     static void MakeLadder(float x, float y, Transform parent)

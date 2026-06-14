@@ -11,13 +11,13 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     [Header("Movimento")]
-    public float walkSpeed = 5.5f;
-    public float runSpeed = 8.5f;
-    public float jumpForce = 13.5f;
+    public float walkSpeed = 6.5f;
+    public float runSpeed = 9.5f;
+    public float jumpForce = 16f;
     public float climbSpeed = 4.5f;
-    public float gravityScale = 3.5f;
-    public float fallMultiplier = 1.7f;   // cai mais rápido (sensação melhor)
-    public float lowJumpMultiplier = 2.2f; // pulo curto ao soltar o botão
+    public float gravityScale = 3.8f;
+    public float fallMultiplier = 2.2f;   // cai mais rápido (sensação melhor)
+    public float lowJumpMultiplier = 2.5f; // pulo curto ao soltar o botão
 
     [Header("Tolerâncias")]
     public float coyoteTime = 0.10f;   // pode pular um instante após sair da borda
@@ -54,6 +54,11 @@ public class PlayerController : MonoBehaviour
         _rb.freezeRotation = true;
         _rb.interpolation = RigidbodyInterpolation2D.Interpolate;
         _rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+
+        // material sem atrito: impede o personagem de "grudar" em paredes/emendas
+        var noFriction = new PhysicsMaterial2D("NoFriction") { friction = 0f, bounciness = 0f };
+        _col.sharedMaterial = noFriction;
+        _rb.sharedMaterial = noFriction;
     }
 
     void Update()

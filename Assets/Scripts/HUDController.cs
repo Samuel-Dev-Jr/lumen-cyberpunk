@@ -81,7 +81,7 @@ public class HUDController : MonoBehaviour
         var rt = t.rectTransform;
         rt.anchorMin = aMin;
         rt.anchorMax = aMax;
-        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.pivot = aMin; // pivô no mesmo canto da âncora -> evita o texto sair da tela
         rt.sizeDelta = size;
         rt.anchoredPosition = pos;
         // sombra para legibilidade
