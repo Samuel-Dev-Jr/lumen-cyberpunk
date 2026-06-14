@@ -1,11 +1,9 @@
 using System.Collections;
 using UnityEngine;
 
-/// <summary>
-/// Cérebro do jogo (padrão Singleton). Controla o game loop de alto nível:
-/// vidas, pontuação, cristais, construção/limpeza das fases, transições,
-/// derrota (Game Over) e vitória. É criado em tempo de execução pelo Bootstrap.
-/// </summary>
+// esse aqui eh o "cerebro" do jogo. fiz como Singleton pra qualquer script
+// conseguir falar com ele facil. cuida das vidas, pontos, cristais, troca de
+// fase, game over e vitoria. quem cria ele eh o Bootstrap quando a cena abre.
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
@@ -13,15 +11,15 @@ public class GameManager : MonoBehaviour
     enum State { Menu, Playing, Transition, GameOver, Win }
     State _state;
 
-    // dificuldade (definida no menu inicial)
+    // dificuldade escolhida la no menu inicial
     public float EnemySpeedMul = 1f;
     public int BossHp = 12;
     int _startLives = 3;
 
     int _lives = 3;
     int _score;
-    int _crystals;       // coletados na fase atual
-    int _totalCrystals;  // total da fase atual
+    int _crystals;       // cristais pegos na fase atual
+    int _totalCrystals;  // total de cristais que a fase tem
     int _levelIndex;
 
     HUDController _hud;
@@ -40,48 +38,35 @@ public class GameManager : MonoBehaviour
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
 
-        // Consultas de física (Raycast/Overlap) ignoram triggers -> simplifica
-        // a detecção de chão (só pega blocos sólidos) sem precisar de tags/layers.
+        // deixo as queries de fisica ignorarem os triggers. assim o check de chao
+        // so pega bloco solido e eu nao preciso ficar criando tag/layer pra tudo.
         Physics2D.queriesHitTriggers = false;
     }
 
     public void Init()
     {
-        // Áudio
         gameObject.AddComponent<AudioManager>();
 
-        // HUD
         var hudGO = new GameObject("HUD");
         hudGO.transform.SetParent(transform);
         _hud = hudGO.AddComponent<HUDController>();
 
-        // Câmera
         SetupCamera();
-
         AudioManager.Instance.StartMusic();
 
-        int lv = StartLevel();
-        if (lv >= 0) { ApplyDifficulty(1); BeginGame(lv); }  // debug: pula o menu
-        else { _state = State.Menu; _hud.ShowMenu(true); }   // mostra o menu inicial
+        // comeca sempre na tela de menu pra pessoa escolher a dificuldade
+        _state = State.Menu;
+        _hud.ShowMenu(true);
     }
 
-    // -startlevel N (debug). Retorna -1 quando ausente (mostra o menu).
-    int StartLevel()
-    {
-        var args = System.Environment.GetCommandLineArgs();
-        for (int i = 0; i < args.Length - 1; i++)
-            if (args[i] == "-startlevel" && int.TryParse(args[i + 1], out int n))
-                return Mathf.Clamp(n, 0, LevelData.Maps.Length - 1);
-        return -1;
-    }
-
+    // tabela de dificuldade. mexo nas vidas, na velocidade dos inimigos e na vida do boss
     void ApplyDifficulty(int d)
     {
         switch (d)
         {
-            case 0: _startLives = 5; EnemySpeedMul = 0.85f; BossHp = 8; break;   // Fácil
-            case 2: _startLives = 2; EnemySpeedMul = 1.30f; BossHp = 18; break;  // Difícil
-            default: _startLives = 3; EnemySpeedMul = 1.0f; BossHp = 12; break;  // Normal
+            case 0: _startLives = 5; EnemySpeedMul = 0.85f; BossHp = 8; break;   // facil
+            case 2: _startLives = 2; EnemySpeedMul = 1.30f; BossHp = 18; break;  // dificil
+            default: _startLives = 3; EnemySpeedMul = 1.0f; BossHp = 12; break;  // normal
         }
     }
 
@@ -96,7 +81,7 @@ public class GameManager : MonoBehaviour
     void SetupCamera()
     {
         _camera = Camera.main;
-        if (_camera == null)
+        if (_camera == null) // por garantia, se nao tiver camera na cena eu crio uma
         {
             var camGO = new GameObject("Main Camera");
             camGO.tag = "MainCamera";
@@ -107,13 +92,12 @@ public class GameManager : MonoBehaviour
         _camera.orthographicSize = 6.5f;
         _camera.clearFlags = CameraClearFlags.SolidColor;
         _camera.backgroundColor = new Color32(12, 14, 26, 255);
-        var t = _camera.transform;
-        t.position = new Vector3(0, 0, -10);
+        _camera.transform.position = new Vector3(0, 0, -10);
 
         _camFollow = _camera.GetComponent<CameraFollow>();
         if (_camFollow == null) _camFollow = _camera.gameObject.AddComponent<CameraFollow>();
 
-        // Fundo (segue a câmera) com flicker neon
+        // fundo da cidade preso na camera, com o SkyController fazendo o flicker neon
         var bg = new GameObject("Backdrop");
         bg.transform.SetParent(_camera.transform);
         bg.transform.localPosition = new Vector3(0, 0, 20);
@@ -127,7 +111,7 @@ public class GameManager : MonoBehaviour
         bg.transform.localScale = new Vector3(w / bgSprite.bounds.size.x, h / bgSprite.bounds.size.y, 1f);
     }
 
-    // ===================== FASES =====================
+    // monta uma fase: apaga a anterior, constroi a nova e atualiza o HUD
     void LoadLevel(int index)
     {
         _levelIndex = index;
@@ -146,7 +130,7 @@ public class GameManager : MonoBehaviour
         _camFollow.SetBounds(info.minX, info.maxX, info.minY, info.maxY);
         _camFollow.SnapToTarget();
 
-        // céu/cidade muda de cor por fase
+        // cada fase tem um ceu de cor diferente
         if (_backdropSR != null) _backdropSR.sprite = SpriteFactory.Background(index);
 
         _hud.SetLives(_lives);
@@ -156,12 +140,13 @@ public class GameManager : MonoBehaviour
         _hud.ShowBoss(false);
         _hud.HideCenter();
         _hud.ShowBanner("Fase " + (index + 1) + " — " + LevelData.Names[index]);
+        // so mostro a dica de controles na primeira fase pra nao poluir o resto
         _hud.SetHint(index == 0
             ? "Setas/A-D: mover  |  Shift: correr  |  Espaco: pular  |  Cima/Baixo: escalar  |  J: atirar"
             : "");
     }
 
-    // ===================== EVENTOS DE JOGO =====================
+    // ---- coisas que os outros scripts chamam durante o jogo ----
     public void CollectCrystal(int value)
     {
         _score += value;
@@ -180,7 +165,7 @@ public class GameManager : MonoBehaviour
 
     public void GainLife()
     {
-        if (_lives < 5) _lives++;
+        if (_lives < 5) _lives++; // nao deixo passar de 5 (a barra so tem 5)
         _hud.SetLives(_lives);
     }
 
@@ -196,7 +181,7 @@ public class GameManager : MonoBehaviour
     public void BossDefeated()
     {
         if (_state != State.Playing) return;
-        _state = State.Transition;
+        _state = State.Transition; // trava aqui pra nao tomar dano de tiro perdido no fim
         _score += 2000;
         _hud.SetScore(_score);
         _hud.ShowBoss(false);
@@ -212,10 +197,8 @@ public class GameManager : MonoBehaviour
         AudioManager.Instance.PlayHurt();
 
         if (_lives <= 0)
-        {
             GameOver();
-        }
-        else if (fellInPit)
+        else if (fellInPit) // se caiu no buraco volta pro inicio da fase
         {
             _player.RespawnAt(_levelStart);
             _camFollow.SnapToTarget();
@@ -228,11 +211,12 @@ public class GameManager : MonoBehaviour
     {
         if (_state != State.Playing) return;
         _state = State.Transition;
-        _score += 500 + _crystals * 25; // bônus de conclusão
+        _score += 500 + _crystals * 25; // bonus por terminar (vale mais se pegou cristal)
         _hud.SetScore(_score);
         _player.SetControl(false);
         AudioManager.Instance.PlayLevelComplete();
 
+        // se for a ultima fase ganhou o jogo, senao vai pra proxima
         if (_levelIndex + 1 >= LevelData.Maps.Length)
             StartCoroutine(WinAfter(1.2f));
         else
@@ -279,7 +263,7 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        // menu inicial: escolha de dificuldade
+        // no menu, espero a pessoa apertar 1, 2 ou 3 pra escolher a dificuldade
         if (_state == State.Menu)
         {
             if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1)) { ApplyDifficulty(0); BeginGame(0); }
@@ -288,11 +272,12 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        // R reinicia depois de morrer ou ganhar
         if ((_state == State.GameOver || _state == State.Win) && Input.GetKeyDown(KeyCode.R))
             RestartGame();
 
         if (Input.GetKeyDown(KeyCode.M))
-            AudioManager.Instance.ToggleMute();
+            AudioManager.Instance.ToggleMute(); // M liga/desliga o som
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {

@@ -2,11 +2,9 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// HUD (interface) construída por código — tema cyberpunk. Mostra: barra de vida
-/// segmentada (neon), cristais, pontuação, munição da arma, barra de vida do CHEFE
-/// e mensagens centrais (fase/Game Over/Vitória).
-/// </summary>
+// faço toda a HUD aqui na mão (sem prefab), com aquele estilo neon cyberpunk.
+// tem a vida em segmentos, cristais, pontos, a munição, a barra do chefe e as
+// mensagens do meio da tela (fase, game over, vitoria).
 public class HUDController : MonoBehaviour
 {
     const int MAX_LIVES = 5;
@@ -42,26 +40,26 @@ public class HUDController : MonoBehaviour
         canvasGO.AddComponent<GraphicRaycaster>();
         _root = canvasGO.transform;
 
-        // ---- vida (coração + segmentos) ----
+        // vida: o coracao + os pedacinhos da barra
         MakeIcon(SpriteFactory.Heart(), new Vector2(0, 1), new Vector2(24, -22), 26);
         _lifeSegs = new Image[MAX_LIVES];
         for (int i = 0; i < MAX_LIVES; i++)
             _lifeSegs[i] = MakeBar(new Vector2(0, 1), new Vector2(56 + i * 40, -22), new Vector2(34, 16), DIM);
 
-        // ---- cristais ----
+        // cristais
         MakeIcon(SpriteFactory.CrystalIcon(), new Vector2(0, 1), new Vector2(24, -56), 26);
         _crystals = MakeText("crystals", new Vector2(0, 1), new Vector2(52, -52), new Vector2(220, 30), 24, TextAnchor.MiddleLeft);
 
-        // ---- munição (escondido até pegar arma) ----
+        // municao: so aparece depois que o player pega a arma
         _ammoGroup = MakeGroup("ammoGroup");
         _weaponIcon = MakeIcon(SpriteFactory.WeaponIcon(), new Vector2(0, 1), new Vector2(24, -90), 26, _ammoGroup.transform);
         _ammo = MakeText("ammo", new Vector2(0, 1), new Vector2(52, -86), new Vector2(180, 30), 24, TextAnchor.MiddleLeft, _ammoGroup.transform);
         _ammoGroup.SetActive(false);
 
-        // ---- pontuação ----
+        // pontuacao (canto direito)
         _score = MakeText("score", new Vector2(1, 1), new Vector2(-20, -22), new Vector2(300, 32), 26, TextAnchor.MiddleRight);
 
-        // ---- barra do chefe (topo central) ----
+        // barra do chefe la em cima no meio
         _bossBar = MakeGroup("bossBar");
         var bgImg = MakeBar(new Vector2(0.5f, 1), new Vector2(0, -50), new Vector2(440, 22), DIM, _bossBar.transform);
         bgImg.rectTransform.pivot = new Vector2(0.5f, 1);
@@ -73,7 +71,7 @@ public class HUDController : MonoBehaviour
         _bossLabel.color = NEON_CYAN;
         _bossBar.SetActive(false);
 
-        // ---- banners e mensagens ----
+        // banner e as mensagens do meio
         _banner = MakeText("banner", new Vector2(0.5f, 1), new Vector2(0, -34), new Vector2(900, 40), 30, TextAnchor.MiddleCenter);
         _center = MakeText("center", new Vector2(0.5f, 0.5f), new Vector2(0, 30), new Vector2(1000, 90), 56, TextAnchor.MiddleCenter);
         _centerSub = MakeText("centerSub", new Vector2(0.5f, 0.5f), new Vector2(0, -40), new Vector2(1000, 60), 26, TextAnchor.MiddleCenter);
@@ -81,7 +79,7 @@ public class HUDController : MonoBehaviour
         _center.gameObject.SetActive(false);
         _centerSub.gameObject.SetActive(false);
 
-        // ---- menu inicial (tela de título + dificuldade) ----
+        // tela de titulo com a escolha de dificuldade
         _menu = MakeGroup("menu");
         var t = _menu.transform;
         var title = MakeText("title", new Vector2(0.5f, 0.5f), new Vector2(0, 150), new Vector2(1000, 90), 72, TextAnchor.MiddleCenter, t);
@@ -98,7 +96,7 @@ public class HUDController : MonoBehaviour
 
     public void ShowMenu(bool v) => _menu.SetActive(v);
 
-    // container que cobre a tela inteira (para os filhos ancorarem corretamente)
+    // um container que ocupa a tela toda, ai os filhos ancoram certinho
     GameObject MakeGroup(string name)
     {
         var go = new GameObject(name, typeof(RectTransform));
@@ -148,7 +146,7 @@ public class HUDController : MonoBehaviour
         return t;
     }
 
-    // ---------- API ----------
+    // metodos que o resto do jogo chama pra atualizar a HUD
     public void SetLives(int n)
     {
         for (int i = 0; i < _lifeSegs.Length; i++)

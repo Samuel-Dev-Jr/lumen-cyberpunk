@@ -1,6 +1,6 @@
 using UnityEngine;
 
-/// <summary>Faz o céu/fundo "piscar" (flicker neon) variando o brilho continuamente.</summary>
+// fica mudando o brilho do fundo pra dar aquele efeito de neon piscando
 public class SkyController : MonoBehaviour
 {
     SpriteRenderer _sr;
@@ -10,7 +10,7 @@ public class SkyController : MonoBehaviour
 
     void Update()
     {
-        // pulsação suave + piscadas neon ocasionais
+        // uma pulsada suave o tempo todo, e de vez em quando uma piscada mais forte
         float pulse = 0.88f + 0.12f * Mathf.Sin(Time.time * 1.3f);
         float flick = 1f;
         _next -= Time.deltaTime;

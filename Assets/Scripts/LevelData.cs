@@ -1,11 +1,8 @@
-using UnityEngine;
-
-/// <summary>
-/// Dados das fases (mapa ASCII) - tema cyberpunk. Cada caractere vira um elemento
-/// montado em tempo de execucao pelo LevelBuilder.
-/// Legenda: '#'=bloco 'H'=escada 'o'=cristal '^'=espinho 'E'=inimigo 'F'=drone
-///          'W'=arma 'L'=coracao 'B'=chefe 'P'=inicio 'X'=saida ' '=vazio
-/// </summary>
+// aqui ficam as fases desenhadas em texto. cada caractere o LevelBuilder transforma
+// num objeto la na hora de montar a fase.
+// legenda dos caracteres:
+//   '#'=bloco  'H'=escada  'o'=cristal  '^'=espinho  'E'=inimigo  'F'=drone
+//   'W'=arma  'L'=coracao  'B'=chefe  'P'=inicio  'X'=saida  ' '=vazio
 public static class LevelData
 {
     public static readonly string[] Names = {

@@ -1,4 +1,4 @@
 using UnityEngine;
 
-/// <summary>Marcador: identifica um segmento de escada/cipó que o jogador pode escalar.</summary>
+// so um marcador pra dizer "isso aqui eh escada, da pra subir"
 public class Ladder : MonoBehaviour { }

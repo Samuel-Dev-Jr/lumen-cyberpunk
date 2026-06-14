@@ -1,6 +1,6 @@
 using UnityEngine;
 
-/// <summary>Item de arma (blaster). Ao pegar, o jogador ganha munição e passa a poder atirar.</summary>
+// item da arma. quando a Luna encosta ela ganha a arma e a municao e ja pode atirar
 public class WeaponPickup : MonoBehaviour
 {
     public int ammo = 12;
@@ -8,7 +8,7 @@ public class WeaponPickup : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (_taken) return;
+        if (_taken) return; // _taken pra nao dar a arma duas vezes se entrar no trigger de novo
         var p = other.GetComponent<PlayerController>();
         if (p == null) return;
         _taken = true;

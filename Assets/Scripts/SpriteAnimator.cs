@@ -1,10 +1,7 @@
 using UnityEngine;
 
-/// <summary>
-/// Reproduz uma sequência de Sprites (frames) em um SpriteRenderer,
-/// trocando o quadro a cada intervalo de tempo. É o nosso "sistema de animação"
-/// por troca de quadros (sprite-sheet animation feita por código).
-/// </summary>
+// vai trocando os frames no SpriteRenderer de tempo em tempo.
+// é tipo uma animacao na mao, sem usar o Animator do Unity
 [RequireComponent(typeof(SpriteRenderer))]
 public class SpriteAnimator : MonoBehaviour
 {
@@ -20,11 +17,11 @@ public class SpriteAnimator : MonoBehaviour
         _sr = GetComponent<SpriteRenderer>();
     }
 
-    /// <summary>Troca a animação atual. Só reinicia se os frames forem diferentes.</summary>
+    // troca a animacao. se ja for a mesma nao reinicia, so atualiza fps/loop
     public void Play(Sprite[] frames, float fps = 8f, bool loop = true)
     {
         if (frames == null || frames.Length == 0) return;
-        if (_frames == frames) { _fps = fps; _loop = loop; return; }
+        if (_frames == frames) { _fps = fps; _loop = loop; return; } // mesma anim, deixa rolando
         _frames = frames;
         _fps = fps;
         _loop = loop;

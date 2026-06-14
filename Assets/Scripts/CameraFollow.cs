@@ -1,9 +1,7 @@
 using UnityEngine;
 
-/// <summary>
-/// Faz a câmera seguir suavemente o jogador, mantendo-a dentro dos limites da
-/// fase para nunca mostrar "fora do mundo".
-/// </summary>
+// camera que segue o player de forma suave, mas presa nos limites da fase
+// pra nao aparecer o "nada" fora do cenario
 public class CameraFollow : MonoBehaviour
 {
     public Transform target;
@@ -30,7 +28,7 @@ public class CameraFollow : MonoBehaviour
         {
             float halfH = _cam.orthographicSize;
             float halfW = halfH * _cam.aspect;
-            // se a fase for menor que a tela, centraliza
+            // quando a fase for menor que a tela nao tem como dar clamp, entao so centraliza
             float cx = (_minX + _maxX) * 0.5f;
             float cy = (_minY + _maxY) * 0.5f;
             goal.x = (_maxX - _minX) > 2 * halfW ? Mathf.Clamp(goal.x, _minX + halfW, _maxX - halfW) : cx;
@@ -39,7 +37,7 @@ public class CameraFollow : MonoBehaviour
         return goal;
     }
 
-    /// <summary>Posiciona a câmera instantaneamente no alvo (usado ao iniciar/recarregar fase).</summary>
+    // joga a camera direto em cima do alvo, sem suavizar. uso isso quando comeca/recarrega a fase
     public void SnapToTarget()
     {
         if (target == null) return;

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-/// <summary>Cristal de luz coletável. Dá pontos e conta para o total da fase.</summary>
+// o cristal que da pra pegar. soma pontos e conta no total da fase.
 public class Collectible : MonoBehaviour
 {
     public int value = 100;
@@ -19,7 +19,7 @@ public class Collectible : MonoBehaviour
         Destroy(gameObject);
     }
 
-    // Pequeno flash visual de feedback ao coletar
+    // so um efeitinho de luz quando pega, fica mais legal
     void SpawnFlash()
     {
         for (int i = 0; i < 6; i++)

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-/// <summary>Portal de saída da fase. Ao tocá-lo, avança para o próximo nível.</summary>
+// o portal de saida. quando o player encosta, vai pra proxima fase
 public class LevelExit : MonoBehaviour
 {
     bool _used;

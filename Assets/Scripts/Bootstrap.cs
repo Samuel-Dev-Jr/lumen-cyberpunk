@@ -1,17 +1,14 @@
 using UnityEngine;
 
-/// <summary>
-/// Ponto de entrada do jogo. O método marcado com [RuntimeInitializeOnLoadMethod]
-/// é chamado automaticamente pela Unity assim que a cena carrega — tanto no Editor
-/// (Play) quanto no executável final. Por isso NÃO é preciso montar nada na cena
-/// manualmente: o jogo inteiro é construído por código a partir daqui.
-/// </summary>
+// por onde o jogo comeca. o metodo com [RuntimeInitializeOnLoadMethod] a Unity
+// chama sozinha assim que a cena carrega, tanto no Play do editor quanto no .exe.
+// por isso nao preciso montar nada na cena na mao, comeca tudo daqui.
 public static class Bootstrap
 {
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Launch()
     {
-        // evita criar dois GameManagers ao recarregar a cena
+        // se ja existe um GameManager nao cria outro (acontece ao recarregar a cena)
         if (GameManager.Instance != null) return;
 
         var go = new GameObject("GameManager");

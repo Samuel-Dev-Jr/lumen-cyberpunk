@@ -1,9 +1,7 @@
 using UnityEngine;
 
-/// <summary>
-/// Chefe final ("Mainframe"). Patrulha a arena, atira projéteis no jogador e causa
-/// dano por contato. É derrotado com tiros (ou pisões). Ao morrer, vence o jogo.
-/// </summary>
+// chefao final, o Mainframe. ele fica indo e voltando, atira no player e da dano se encostar.
+// pra matar tem que dar tiro nele (ou pular em cima). quando ele morre o jogo ta ganho.
 public class Boss : MonoBehaviour
 {
     public int maxHp = 12;
@@ -18,7 +16,7 @@ public class Boss : MonoBehaviour
 
     void Start()
     {
-        if (GameManager.Instance != null) maxHp = GameManager.Instance.BossHp; // dificuldade
+        if (GameManager.Instance != null) maxHp = GameManager.Instance.BossHp; // a vida muda dependendo da dificuldade
         _hp = maxHp;
         _sr = GetComponent<SpriteRenderer>();
         _spawnX = transform.position.x;
@@ -30,7 +28,7 @@ public class Boss : MonoBehaviour
     {
         if (_dead) return;
 
-        // movimento vai-e-vem + flutuação
+        // ele anda de um lado pro outro e fica flutuando de leve (o sin)
         transform.position += new Vector3(_dir * _speed * Time.deltaTime, 0f, 0f);
         if (transform.position.x > _spawnX + _range) _dir = -1f;
         if (transform.position.x < _spawnX - _range) _dir = 1f;
@@ -38,7 +36,7 @@ public class Boss : MonoBehaviour
         pos.y = _baseY + Mathf.Sin(Time.time * 1.5f) * 0.5f;
         transform.position = pos;
 
-        // flash ao tomar dano
+        // fica vermelho piscando quando leva tiro
         if (_flash > 0f)
         {
             _flash -= Time.deltaTime;
@@ -46,11 +44,11 @@ public class Boss : MonoBehaviour
             if (_flash <= 0f) _sr.color = Color.white;
         }
 
-        // ataque: atira em direção ao jogador
+        // de tempo em tempo ele atira no player
         _shootTimer -= Time.deltaTime;
         if (_shootTimer <= 0f)
         {
-            _shootTimer = Mathf.Lerp(2.2f, 0.9f, 1f - (float)_hp / maxHp); // mais rápido com pouca vida
+            _shootTimer = Mathf.Lerp(2.2f, 0.9f, 1f - (float)_hp / maxHp); // quanto menos vida ele tem, mais rapido ele atira (fica mais dificil)
             Shoot();
         }
     }
@@ -60,7 +58,7 @@ public class Boss : MonoBehaviour
         var player = GameManager.Instance.Player;
         if (player == null) return;
         Vector2 to = (player.transform.position - transform.position).normalized;
-        // tiro triplo em leque
+        // atira 3 tiros meio abertos pros lados, tipo um leque
         for (int i = -1; i <= 1; i++)
         {
             float ang = Mathf.Atan2(to.y, to.x) + i * 12f * Mathf.Deg2Rad;
@@ -83,7 +81,7 @@ public class Boss : MonoBehaviour
     {
         _dead = true;
         AudioManager.Instance.PlayBossDie();
-        // explosão de partículas
+        // faz um monte de quadradinho voar pra parecer uma explosao
         for (int i = 0; i < 24; i++)
         {
             var go = new GameObject("boom");
@@ -108,10 +106,11 @@ public class Boss : MonoBehaviour
         if (_dead) return;
         var p = other.GetComponent<PlayerController>();
         if (p == null) return;
+        // se a Luna ta caindo e bate na cabeca dele, conta como pisao e ela quica
         if (p.Velocity.y < 0.5f && p.transform.position.y > transform.position.y + 1.2f)
         {
             Hit(1); p.Bounce();
         }
-        else p.TakeDamage(transform.position);
+        else p.TakeDamage(transform.position); // senao ela que toma dano
     }
 }

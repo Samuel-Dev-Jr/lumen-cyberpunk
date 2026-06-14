@@ -1,6 +1,6 @@
 using UnityEngine;
 
-/// <summary>Faísca de feedback visual: move-se, desacelera, some e se destrói.</summary>
+// faiscazinha pra dar um feedback visual. ela anda, vai freando, some e se destroi sozinha
 public class Spark : MonoBehaviour
 {
     Vector2 _vel;

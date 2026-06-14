@@ -1,18 +1,15 @@
 using UnityEngine;
 
-/// <summary>
-/// Gera TODO o áudio do jogo por código (síntese procedural): efeitos sonoros
-/// estilo "chiptune" e uma trilha sonora em loop. Assim não dependemos de
-/// arquivos de áudio externos — tudo é criado em tempo de execução com ondas.
-/// </summary>
+// aqui eu gero todo o som do jogo por codigo, na base de ondas (meio chiptune mesmo).
+// fiz assim pra nao precisar baixar nenhum arquivo de audio, tudo nasce em runtime
 public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance { get; private set; }
 
-    const int SR = 44100; // taxa de amostragem
+    const int SR = 44100; // sample rate padrao
 
-    AudioSource _sfx;   // efeitos (PlayOneShot)
-    AudioSource _music; // trilha em loop
+    AudioSource _sfx;   // os efeitinhos, toco com PlayOneShot
+    AudioSource _music; // a musica de fundo, fica em loop
 
     AudioClip _jump, _coin, _hurt, _stomp, _levelUp, _win, _over, _theme;
     AudioClip _shoot, _pickup, _bossHit, _bossDie;
@@ -50,10 +47,10 @@ public class AudioManager : MonoBehaviour
         _theme = BuildTheme();
     }
 
-    // ---------- Geradores de onda ----------
+    // ---------- geradores de onda ----------
     static float Square(float phase) { return (phase % 1f) < 0.5f ? 1f : -1f; }
 
-    // Envelope simples: ataque rápido + decaimento exponencial
+    // envelope bem simples: sobe rapido e cai exponencial pra nao ficar seco
     static float Env(float t, float dur)
     {
         float attack = 0.005f;
@@ -111,18 +108,18 @@ public class AudioManager : MonoBehaviour
         return ToClip(name, data);
     }
 
-    // ---------- Trilha sonora (loop) ----------
+    // ---------- a musica de fundo (loop) ----------
     AudioClip BuildTheme()
     {
-        float beat = 0.25f;          // duração de cada nota (semínima rápida)
-        // Melodia em Lá menor pentatônica (0 = silêncio)
+        float beat = 0.25f;          // quanto cada nota dura
+        // melodia em la menor (o 0 é pausa)
         float[] mel = {
             440, 523, 659, 523,  587, 523, 440, 0,
             392, 440, 523, 440,  330, 392, 440, 0,
             440, 523, 659, 784,  659, 523, 440, 0,
             587, 523, 440, 392,  440, 0,   330, 0
         };
-        // Linha de baixo (uma nota grave a cada 4 batidas) — progressão Am F C G
+        // o baixo, uma nota grave segurando a cada 4 tempos (Am F C G)
         float[] bass = { 220, 220, 220, 220, 174.61f, 174.61f, 174.61f, 174.61f,
                          261.63f, 261.63f, 261.63f, 261.63f, 196f, 196f, 196f, 196f,
                          220, 220, 220, 220, 174.61f, 174.61f, 174.61f, 174.61f,
@@ -151,7 +148,7 @@ public class AudioManager : MonoBehaviour
                 data[idx] = s;
             }
         }
-        // pequeno fade nas pontas para o loop não estalar
+        // um fadezinho no comeco e no fim senao da um "tec" quando o loop volta
         int fade = 300;
         for (int i = 0; i < fade && i < n; i++)
         {
@@ -169,7 +166,7 @@ public class AudioManager : MonoBehaviour
         return clip;
     }
 
-    // ---------- API pública ----------
+    // ---------- o que o resto do jogo chama ----------
     void Play(AudioClip c, float vol = 1f) { if (!Muted && c != null) _sfx.PlayOneShot(c, vol); }
 
     public void PlayJump() => Play(_jump, 0.5f);

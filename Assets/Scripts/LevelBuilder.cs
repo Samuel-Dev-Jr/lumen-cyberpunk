@@ -1,6 +1,6 @@
 using UnityEngine;
 
-/// <summary>Informações resultantes da construção de uma fase.</summary>
+// o que sobra depois de montar a fase (referencia do player, limites, etc)
 public class LevelInfo
 {
     public GameObject player;
@@ -10,11 +10,9 @@ public class LevelInfo
     public float minX, maxX, minY, maxY;
 }
 
-/// <summary>
-/// Lê um mapa ASCII (LevelData) e instancia todos os objetos da fase em tempo
-/// de execução: blocos, escadas, espinhos, cristais, inimigos, saída e o jogador.
-/// Tudo fica sob um objeto-pai "Level" para facilitar a limpeza entre fases.
-/// </summary>
+// pego o mapa de texto do LevelData e vou criando tudo na fase: chao, escadas,
+// espinhos, cristais, inimigos, a saida e o player. coloco tudo embaixo do "Level"
+// pra ficar facil de apagar quando troca de fase.
 public static class LevelBuilder
 {
     public static LevelInfo Build(string[] map, Transform parent)
@@ -31,8 +29,8 @@ public static class LevelBuilder
             maxY = rows,
         };
 
-        // Todos os blocos de chão entram em UM ÚNICO colisor (CompositeCollider2D).
-        // Isso elimina as "emendas" entre blocos onde o personagem travava ao andar/pular.
+        // joguei todos os blocos de chao num colisor so (CompositeCollider2D).
+        // antes o player travava na "emenda" entre um bloco e outro, isso resolveu.
         var groundGO = new GameObject("Ground");
         groundGO.transform.SetParent(parent);
         var grb = groundGO.AddComponent<Rigidbody2D>();
@@ -50,7 +48,7 @@ public static class LevelBuilder
                 char c = line[col];
                 if (c == ' ') continue;
                 float x = col;
-                float y = rows - 1 - row; // primeira linha = topo
+                float y = rows - 1 - row; // a primeira linha do texto eh o topo
 
                 switch (c)
                 {
@@ -71,7 +69,7 @@ public static class LevelBuilder
             }
         }
 
-        comp.GenerateGeometry(); // gera o colisor unico do chão
+        comp.GenerateGeometry(); // aqui ele gera o colisor unicao do chao
 
         info.player = MakePlayer(info.playerStart, parent);
         info.player.GetComponent<PlayerController>().killY = info.minY - 8f;
@@ -85,7 +83,7 @@ public static class LevelBuilder
         return col < line.Length ? line[col] : ' ';
     }
 
-    // bloco com "grama" no topo quando não há bloco logo acima
+    // se nao tem bloco em cima, esse vira o de cima (com "grama")
     static bool IsTopTile(string[] map, int row, int col) => CharAt(map, row - 1, col) != '#';
 
     static GameObject NewObj(string name, float x, float y, Transform parent, int order)
@@ -104,7 +102,7 @@ public static class LevelBuilder
         go.GetComponent<SpriteRenderer>().sprite = SpriteFactory.Tile(grassTop);
         var col = go.AddComponent<BoxCollider2D>();
         col.size = Vector2.one;
-        col.usedByComposite = true; // funde com o CompositeCollider2D do chão
+        col.usedByComposite = true; // pra ele entrar no colisor unico do chao
     }
 
     static void MakeLadder(float x, float y, Transform parent)
@@ -194,7 +192,7 @@ public static class LevelBuilder
         col.size = new Vector2(0.6f, 0.85f);
         col.offset = new Vector2(0f, -0.05f);
 
-        // visual em objeto-filho: permite trocar/escalar o sprite (ex.: Luna) sem mexer na colisão
+        // deixo o visual num filho separado, ai da pra trocar/escalar o sprite (a Luna) sem mexer no colisor
         var vis = new GameObject("Visual");
         vis.transform.SetParent(go.transform);
         vis.transform.localPosition = Vector3.zero;

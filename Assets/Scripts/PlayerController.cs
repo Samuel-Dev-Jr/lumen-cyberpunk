@@ -1,12 +1,7 @@
 using UnityEngine;
 
-/// <summary>
-/// Controle do personagem "Lumen". Implementa as mecânicas exigidas:
-/// ANDAR, CORRER (Shift), PULAR (Espaço) e ESCALAR (em escadas).
-/// Inclui sensação de jogo refinada: coyote time, jump buffer, pulo de altura
-/// variável e gravidade aumentada na queda. As animações são trocadas conforme
-/// o estado (parado, andando, correndo, pulando, caindo, escalando).
-/// </summary>
+// script que controla a Luna (o player). fiz aqui o andar, correr (shift), pular (espaço) e escalar escada.
+// tem umas coisinhas pra deixar o pulo gostoso tipo coyote time e jump buffer.
 [RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D))]
 public class PlayerController : MonoBehaviour
 {
@@ -16,14 +11,14 @@ public class PlayerController : MonoBehaviour
     public float jumpForce = 16f;
     public float climbSpeed = 4.5f;
     public float gravityScale = 3.8f;
-    public float fallMultiplier = 2.2f;   // cai mais rápido (sensação melhor)
-    public float lowJumpMultiplier = 2.5f; // pulo curto ao soltar o botão
+    public float fallMultiplier = 2.2f;   // cai mais rapido, fica menos flutuante
+    public float lowJumpMultiplier = 2.5f; // se soltar o botao o pulo fica baixinho
 
     [Header("Tolerâncias")]
-    public float coyoteTime = 0.10f;   // pode pular um instante após sair da borda
-    public float jumpBuffer = 0.12f;   // registra o pulo um instante antes de tocar o chão
+    public float coyoteTime = 0.10f;   // coyote time, da uns ms pra pular dps de sair da plataforma
+    public float jumpBuffer = 0.12f;   // se apertar pular um pouco antes do chao, ainda vale
 
-    public float killY = -50f; // abaixo disso, caiu no abismo
+    public float killY = -50f; // se cair abaixo disso morreu (caiu no buraco)
 
     [Header("Arma")]
     public float fireCooldown = 0.28f;
@@ -34,7 +29,7 @@ public class PlayerController : MonoBehaviour
     public bool HasWeapon => _hasWeapon;
     public int Ammo => _ammo;
 
-    // ----- estado interno -----
+    // variaveis de controle interno
     Rigidbody2D _rb;
     BoxCollider2D _col;
     SpriteRenderer _sr;
@@ -50,7 +45,7 @@ public class PlayerController : MonoBehaviour
     bool _control = true;
     bool _fell;
 
-    // visual em objeto-filho (permite personagem customizado "Luna")
+    // o sprite fica num objeto filho pra eu poder usar a arte da Luna
     Transform _visual;
     bool _useCustom;
     float _visBaseY;
@@ -72,7 +67,7 @@ public class PlayerController : MonoBehaviour
         _rb.interpolation = RigidbodyInterpolation2D.Interpolate;
         _rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
-        // material sem atrito: impede o personagem de "grudar" em paredes/emendas
+        // material sem atrito senao a Luna gruda na parede quando encosta, ficava travando
         var noFriction = new PhysicsMaterial2D("NoFriction") { friction = 0f, bounciness = 0f };
         _col.sharedMaterial = noFriction;
         _rb.sharedMaterial = noFriction;
@@ -83,7 +78,7 @@ public class PlayerController : MonoBehaviour
         if (_invuln > 0f)
         {
             _invuln -= Time.deltaTime;
-            // pisca durante a invulnerabilidade
+            // fica piscando enquanto ta invencivel pra mostrar que tomou dano
             float a = Mathf.PingPong(Time.time * 12f, 1f) > 0.5f ? 0.35f : 1f;
             var c = _sr.color; c.a = a; _sr.color = c;
             if (_invuln <= 0f) { var cc = _sr.color; cc.a = 1f; _sr.color = cc; }
@@ -91,7 +86,7 @@ public class PlayerController : MonoBehaviour
 
         if (!_control) { _h = _v = 0f; UpdateAnimation(); return; }
 
-        // ----- input (teclado legado: setas + WASD) -----
+        // leitura das teclas, deixei funcionar com WASD e com as setas tbm
         _h = 0f;
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) _h -= 1f;
         if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) _h += 1f;
@@ -106,21 +101,21 @@ public class PlayerController : MonoBehaviour
 
         if (_bufferTimer > 0f) _bufferTimer -= Time.deltaTime;
 
-        // tiro (J ou clique esquerdo)
+        // atirar: pode ser no J ou no botao esquerdo do mouse
         if (_fireTimer > 0f) _fireTimer -= Time.deltaTime;
         if (_shootAnimTimer > 0f) _shootAnimTimer -= Time.deltaTime;
         if ((Input.GetKey(KeyCode.J) || Input.GetMouseButton(0)) && _hasWeapon && _ammo > 0 && _fireTimer <= 0f)
             Shoot();
 
-        // entra no modo escalada ao pressionar cima/baixo sobre uma escada
+        // se ta em cima de uma escada e aperta pra cima/baixo, comeca a escalar
         if (_ladderCount > 0 && Mathf.Abs(_v) > 0.1f) _climbing = true;
         if (_ladderCount == 0) _climbing = false;
 
-        // vira o sprite conforme a direção
+        // vira o sprite pro lado que ta andando
         if (_h > 0.1f && !_facingRight) Flip();
         else if (_h < -0.1f && _facingRight) Flip();
 
-        // caiu no abismo?
+        // checa se caiu no buraco
         if (!_fell && transform.position.y < killY)
         {
             _fell = true;
@@ -144,7 +139,7 @@ public class PlayerController : MonoBehaviour
         {
             _rb.gravityScale = 0f;
             _rb.linearVelocity = new Vector2(_h * walkSpeed * 0.7f, _v * climbSpeed);
-            // pular sai da escada
+            // se apertar pra pular enquanto escala, ela larga a escada e pula
             if (_bufferTimer > 0f)
             {
                 _climbing = false;
@@ -156,19 +151,19 @@ public class PlayerController : MonoBehaviour
 
         _rb.gravityScale = gravityScale;
 
-        // movimento horizontal (corrida com Shift)
+        // anda na horizontal, se tiver com shift corre
         float speed = _runHeld ? runSpeed : walkSpeed;
         _rb.linearVelocity = new Vector2(_h * speed, _rb.linearVelocity.y);
 
-        // coyote time
+        // conta o coyote time
         if (_grounded) _coyoteTimer = coyoteTime;
         else if (_coyoteTimer > 0f) _coyoteTimer -= Time.fixedDeltaTime;
 
-        // pulo (com buffer + coyote)
+        // so pula se tiver buffer e ainda dentro do coyote
         if (_bufferTimer > 0f && _coyoteTimer > 0f)
             DoJump();
 
-        // gravidade extra para um pulo/queda com melhor sensação
+        // essa parte aumenta a gravidade pra cair mais rapido e o pulo nao ficar boiando
         if (_rb.linearVelocity.y < 0f)
             _rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1f) * Time.fixedDeltaTime;
         else if (_rb.linearVelocity.y > 0f && !_jumpHeld)
@@ -189,7 +184,7 @@ public class PlayerController : MonoBehaviour
         Bounds b = _col.bounds;
         Vector2 center = new Vector2(b.center.x, b.min.y - 0.02f);
         Vector2 size = new Vector2(b.size.x * 0.85f, 0.12f);
-        // queriesHitTriggers está desligado globalmente, então só pega colisores sólidos
+        // como o queriesHitTriggers ta desligado isso aqui so pega coisa solida, ignora trigger
         var hits = Physics2D.OverlapBoxAll(center, size, 0f);
         _grounded = false;
         foreach (var h in hits)
@@ -210,18 +205,18 @@ public class PlayerController : MonoBehaviour
             _useCustom = true;
             if (_anim != null) _anim.enabled = false;
             _sr.sprite = luna;
-            if (luna.texture != null) luna.texture.filterMode = FilterMode.Point; // mantém pixel nítido
-            float target = 1.5f; // altura desejada em unidades
+            if (luna.texture != null) luna.texture.filterMode = FilterMode.Point; // point pra nao borrar o pixel art
+            float target = 1.5f; // altura que eu quero que ela tenha
             float s = target / luna.bounds.size.y;
             _visBaseScale = new Vector3(s, s, 1f);
             float colBottom = _col.offset.y - _col.size.y / 2f;
-            _visBaseY = colBottom + target / 2f; // pés no chão
+            _visBaseY = colBottom + target / 2f; // calculo pra deixar o pe dela encostando no chao
             _visual.localScale = _visBaseScale;
             _visual.localPosition = new Vector3(0f, _visBaseY, 0f);
         }
     }
 
-    // animação por transform para o personagem customizado (sem trocar quadros)
+    // como a Luna nao tem varios frames, faco a animacao mexendo no transform mesmo (sobe/desce e estica)
     void CustomVisual()
     {
         float bob = 0f, stretchY = 1f, squashX = 1f;
@@ -269,17 +264,17 @@ public class PlayerController : MonoBehaviour
         _sr.flipX = !_facingRight;
     }
 
-    // ----- escadas -----
+    // conta em quantas escadas a Luna ta encostando (pode ser mais de uma colada)
     void OnTriggerEnter2D(Collider2D other) { if (other.GetComponent<Ladder>() != null) _ladderCount++; }
     void OnTriggerExit2D(Collider2D other) { if (other.GetComponent<Ladder>() != null) _ladderCount = Mathf.Max(0, _ladderCount - 1); }
 
-    // ----- dano / vida -----
+    // quando toma dano
     public void TakeDamage(Vector2 source)
     {
         if (_invuln > 0f || !_control) return;
 
         GameManager.Instance.DamagePlayer(false);
-        if (!_control) return; // morreu (game over) -> não aplica knockback
+        if (!_control) return; // se morreu nao adianta empurrar
 
         _invuln = 1.1f;
         float dir = Mathf.Sign(transform.position.x - source.x);

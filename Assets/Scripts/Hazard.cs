@@ -1,6 +1,6 @@
 using UnityEngine;
 
-/// <summary>Perigo (espinhos). Causa dano ao jogador no contato.</summary>
+// os espinhos. machuca o player se encostar
 public class Hazard : MonoBehaviour
 {
     void OnTriggerEnter2D(Collider2D other) => Hit(other);

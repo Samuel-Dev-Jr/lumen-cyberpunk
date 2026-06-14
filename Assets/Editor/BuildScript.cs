@@ -3,11 +3,8 @@ using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 
-/// <summary>
-/// Script de build (apenas para o Editor). Permite gerar o executável Windows
-/// pela linha de comando, sem abrir as janelas do editor. Também pode ser
-/// chamado pelo menu: "Lumen > Build Windows".
-/// </summary>
+// script de build, so roda no editor. gera o .exe do Windows pela linha de comando
+// sem precisar ficar clicando, ou pelo menu "Lumen > Build Windows".
 public static class BuildScript
 {
     const string Output = "Build/Lumen.exe";
@@ -32,7 +29,7 @@ public static class BuildScript
         else
             Debug.LogError("BUILD_FAILED :: " + summary.result + " :: errors=" + summary.totalErrors);
 
-        // só encerra o processo quando rodando em batch (linha de comando)
+        // so fecha o processo se tiver rodando em batch (pela linha de comando)
         if (Application.isBatchMode)
             EditorApplication.Exit(summary.result == BuildResult.Succeeded ? 0 : 1);
     }
