@@ -35,7 +35,7 @@
 <div class="cover">
   <div class="tag">UNIFECAF • GAME DEVELOPMENT</div>
   <h1>LUMEN</h1>
-  <div class="sub">Relatório Teórico — Desenvolvimento de um Jogo de Plataforma 2D na Unity</div>
+  <div class="sub">Relatório Teórico — Plataforma 2D Cyberpunk na Unity</div>
   <div class="meta">
     <strong>Aluno:</strong> Samuel Nunes<br>
     <strong>Disciplina:</strong> Game Development<br>
@@ -45,12 +45,12 @@
 </div>
 
 <h1>1. Introdução e proposta do jogo</h1>
-<p class="lead"><strong>Lumen</strong> é um jogo de plataforma 2D em que o jogador controla uma pequena
-centelha de luz presa nas cavernas escuras do subsolo. Para escapar, ela precisa atravessar
-fendas e abismos, escalar cipós, desviar de espinhos e de criaturas das sombras, coletando
-<em>cristais de luz</em> que iluminam o caminho de volta à superfície. A narrativa é simples e
-serve de moldura temática: cada fase representa uma camada mais profunda — e mais perigosa — da
-caverna, e a "luz" no fim de cada nível é o portal para a próxima etapa da subida.</p>
+<p class="lead"><strong>Lumen</strong> é um jogo de plataforma 2D com estética <strong>cyberpunk</strong>
+(neon synthwave). O jogador controla um pequeno <em>netrunner</em> de luz que precisa atravessar
+os níveis de uma megacidade subterrânea: saltando por abismos, escalando, coletando
+<em>data-shards</em>, pegando <em>armas</em> para atirar em drones e bots de segurança, até
+enfrentar o <strong>MAINFRAME</strong> — o chefe final — em uma arena. A cada fase, o céu da
+cidade muda de cor e pulsa em neon, reforçando a progressão e a atmosfera.</p>
 
 <p>Este relatório apresenta os fundamentos teóricos aplicados na construção do jogo e os conecta
 diretamente às decisões de implementação. O projeto foi desenvolvido na <strong>Unity 6</strong> com
@@ -103,21 +103,26 @@ manual no editor a praticamente zero e tornou o resultado reprodutível em qualq
   <tr><td>Correr</td><td>Aumenta a velocidade, exigido para vencer vãos maiores.</td><td>Shift (segurar)</td></tr>
   <tr><td>Pular</td><td>Pulo com altura variável e gravidade ajustada na queda.</td><td>Espaço</td></tr>
   <tr><td>Escalar</td><td>Sobe/desce cipós, desativando a gravidade enquanto agarrado.</td><td>↑ ↓ ou W / S</td></tr>
+  <tr><td>Atirar</td><td>Após pegar uma arma, dispara projéteis neon na direção atual.</td><td>J ou clique</td></tr>
   <tr><td>Pisão</td><td>Derrota inimigos ao cair sobre eles, com pequeno repique.</td><td>(cair sobre o inimigo)</td></tr>
 </table>
+<p>Há ainda dois tipos de inimigo (bots terrestres e <em>drones</em> voadores), itens de
+<strong>arma</strong> que concedem munição, e um <strong>chefe final</strong> com barra de vida,
+movimento e ataques à distância, exigindo o domínio combinado de movimento e tiro.</p>
 
 <h1>4. Abordagem de design de níveis com progressão de dificuldade</h1>
-<p>Foram criadas <strong>quatro fases</strong> com dificuldade crescente, cada uma introduzindo ou
+<p>Foram criadas <strong>cinco fases</strong> com dificuldade crescente, cada uma introduzindo ou
 intensificando um desafio. Os níveis são descritos como <strong>mapas ASCII</strong> (uma matriz de
 caracteres), e um construtor (<code>LevelBuilder</code>) traduz cada símbolo em objetos do jogo.
 Essa técnica torna o design de fases rápido, legível e fácil de balancear.</p>
 
 <table>
   <tr><th>Fase</th><th>Tema</th><th>Novidade / desafio</th></tr>
-  <tr><td>1 — Despertar</td><td>Tutorial</td><td>Terreno plano, ensina andar/pular/coletar; escada opcional de bônus.</td></tr>
-  <tr><td>2 — Fendas</td><td>Abismos</td><td>Fossos que exigem pulo; primeiros espinhos; escalada obrigatória até a saída.</td></tr>
-  <tr><td>3 — Abismo</td><td>Verticalidade</td><td>Mais fossos e inimigos; torre de escalada longa até a saída no alto.</td></tr>
-  <tr><td>4 — A Luz</td><td>Síntese</td><td>Combina tudo: muitos fossos, espinhos junto a saltos, vários inimigos e escalada final.</td></tr>
+  <tr><td>1 — Boot</td><td>Tutorial</td><td>Terreno plano; ensina andar/pular/coletar; primeira arma e drone.</td></tr>
+  <tr><td>2 — Submundo</td><td>Abismos</td><td>Fossos que exigem pulo; primeiros espinhos; escalada obrigatória.</td></tr>
+  <tr><td>3 — Arranha-Céu</td><td>Verticalidade</td><td>Mais fossos, drones e uma torre de escalada longa.</td></tr>
+  <tr><td>4 — O Núcleo</td><td>Síntese</td><td>Combina tudo: muitos fossos, espinhos junto a saltos, vários inimigos.</td></tr>
+  <tr><td>5 — MAINFRAME</td><td>Chefe</td><td>Arena do chefe final: pegar armas, desviar de tiros e destruir o boss.</td></tr>
 </table>
 
 <p>A progressão segue o princípio de <em>"ensinar, depois testar"</em>: a Fase 1 apresenta cada
@@ -150,15 +155,16 @@ Há ainda um <em>banner</em> com o nome da fase no início de cada nível e mens
 </ul>
 
 <h1>6. Lógica de programação em C# e estrutura do game loop</h1>
-<p>O código está organizado em <strong>17 scripts C#</strong> com responsabilidades bem definidas
-(princípio da responsabilidade única). Os principais são:</p>
+<p>O código está organizado em cerca de <strong>20 scripts C#</strong> com responsabilidades bem
+definidas (princípio da responsabilidade única). Os principais são:</p>
 <table>
   <tr><th>Script</th><th>Responsabilidade</th></tr>
   <tr><td><code>Bootstrap</code></td><td>Ponto de entrada; inicia o jogo automaticamente ao carregar a cena.</td></tr>
   <tr><td><code>GameManager</code></td><td>Singleton; controla vidas, pontuação, fases, vitória/derrota.</td></tr>
   <tr><td><code>PlayerController</code></td><td>Mecânicas de movimento e animação do personagem.</td></tr>
   <tr><td><code>LevelData</code> / <code>LevelBuilder</code></td><td>Dados das fases (ASCII) e sua construção em objetos.</td></tr>
-  <tr><td><code>Enemy</code>, <code>Collectible</code>, <code>Hazard</code>, <code>LevelExit</code>, <code>Ladder</code></td><td>Comportamentos dos elementos da fase.</td></tr>
+  <tr><td><code>Enemy</code>, <code>Boss</code>, <code>Projectile</code>, <code>WeaponPickup</code></td><td>Inimigos/drones, chefe, tiros e armas.</td></tr>
+  <tr><td><code>Collectible</code>, <code>Hazard</code>, <code>LevelExit</code>, <code>Ladder</code>, <code>SkyController</code></td><td>Coletáveis, perigos, saída, escada e flicker do céu.</td></tr>
   <tr><td><code>HUDController</code></td><td>Interface do usuário.</td></tr>
   <tr><td><code>AudioManager</code></td><td>Síntese de áudio (trilha e efeitos).</td></tr>
   <tr><td><code>SpriteFactory</code> / <code>SpriteAnimator</code></td><td>Geração e animação de sprites.</td></tr>
@@ -205,6 +211,8 @@ estilo "chiptune") e as converte em <code>AudioClip</code> via <code>AudioClip.C
   <tr><td>Coleta de cristal</td><td>Dois tons agudos ("bling").</td></tr>
   <tr><td>Dano</td><td>Varredura descendente com ruído.</td></tr>
   <tr><td>Pisão em inimigo</td><td>Tom grave curto.</td></tr>
+  <tr><td>Tiro / pegar arma</td><td>Varredura aguda rápida / arpejo de coleta.</td></tr>
+  <tr><td>Dano no chefe / chefe destruído</td><td>Ruído grave / sequência descendente longa.</td></tr>
   <tr><td>Fase concluída / Vitória</td><td>Arpejo ascendente.</td></tr>
 </table>
 <p>A <strong>trilha sonora</strong> é um loop melódico em Lá menor pentatônica, com uma linha de
@@ -214,12 +222,15 @@ de assets. Um pequeno <em>fade</em> nas pontas do loop evita estalos na repetiç
 <span class="mono">M</span> ativa/desativa o som.</p>
 
 <h1>8. Uso de assets, sprites e animações na Unity</h1>
-<p>A arte de Lumen é <strong>original e gerada por código</strong> (procedural). A
-<code>SpriteFactory</code> desenha cada sprite pixel a pixel em uma <code>Texture2D</code> (16×16)
-e a converte em <code>Sprite</code> com filtro <em>Point</em>, resultando em uma estética
-<em>pixel art</em> limpa. São gerados: o personagem (com quadros de parado, andar, pular e escalar),
-inimigos, cristais (com brilho de giro), blocos de cenário, escadas, espinhos, o portal de saída e
-o fundo com estrelas.</p>
+<p>A arte de Lumen é <strong>original e gerada por código</strong> (procedural), com paleta
+<strong>cyberpunk neon</strong> (ciano, magenta e amarelo sobre fundo escuro). A
+<code>SpriteFactory</code> desenha cada sprite pixel a pixel em uma <code>Texture2D</code> (16×16,
+e 48×48 no chefe) e a converte em <code>Sprite</code> com filtro <em>Point</em>, resultando em uma
+estética <em>pixel art</em> limpa. São gerados: o personagem (quadros de parado, andar, pular,
+escalar e atirar), bots e <em>drones</em> voadores, o <strong>chefe</strong>, data-shards, armas,
+projéteis, lajes com faixa neon, escadas, espinhos de energia, o portal de saída e um
+<strong>fundo de cidade</strong> com silhuetas de prédios, janelas acesas e céu que muda de cor por
+fase (com <em>flicker</em> neon controlado pelo <code>SkyController</code>).</p>
 
 <h3>Animação</h3>
 <p>As animações usam <strong>troca de quadros</strong> (sprite-sheet animation) — a mesma técnica
@@ -261,8 +272,9 @@ adequada como peça de portfólio.</p>
 <p class="small">
 Unity Technologies. <em>Unity Learn — Get Started</em>. Disponível em: unity.com/learn.<br>
 Maddy Makes Games. <em>Celeste</em>, 2018 (referência de game feel e mecânica de escalada).<br>
+Askiisoft. <em>Katana ZERO</em>, 2019 (estética neon/synthwave e ação 2D).<br>
+CD Projekt RED. <em>Cyberpunk 2077</em>, 2020 (referência estética do tema cyberpunk).<br>
 Nintendo. <em>Super Mario Bros.</em>, 1985 (fundamentos do gênero plataforma).<br>
-Team Cherry. <em>Hollow Knight</em>, 2017 (atmosfera e exploração vertical).<br>
 Kenney. <em>Game Assets (CC0)</em>. Disponível em: kenney.nl/assets.
 </p>
 

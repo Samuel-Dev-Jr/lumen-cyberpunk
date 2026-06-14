@@ -7,7 +7,7 @@ using UnityEngine;
 /// variável e gravidade aumentada na queda. As animações são trocadas conforme
 /// o estado (parado, andando, correndo, pulando, caindo, escalando).
 /// </summary>
-[RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D), typeof(SpriteRenderer))]
+[RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D))]
 public class PlayerController : MonoBehaviour
 {
     [Header("Movimento")]
@@ -25,6 +25,15 @@ public class PlayerController : MonoBehaviour
 
     public float killY = -50f; // abaixo disso, caiu no abismo
 
+    [Header("Arma")]
+    public float fireCooldown = 0.28f;
+    public float bulletSpeed = 13f;
+    bool _hasWeapon;
+    int _ammo;
+    float _fireTimer, _shootAnimTimer;
+    public bool HasWeapon => _hasWeapon;
+    public int Ammo => _ammo;
+
     // ----- estado interno -----
     Rigidbody2D _rb;
     BoxCollider2D _col;
@@ -41,14 +50,22 @@ public class PlayerController : MonoBehaviour
     bool _control = true;
     bool _fell;
 
+    // visual em objeto-filho (permite personagem customizado "Luna")
+    Transform _visual;
+    bool _useCustom;
+    float _visBaseY;
+    Vector3 _visBaseScale = Vector3.one;
+
     public Vector2 Velocity => _rb.linearVelocity;
 
     void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
         _col = GetComponent<BoxCollider2D>();
-        _sr = GetComponent<SpriteRenderer>();
-        _anim = GetComponent<SpriteAnimator>();
+        _sr = GetComponentInChildren<SpriteRenderer>();
+        _anim = GetComponentInChildren<SpriteAnimator>();
+
+        SetupVisual();
 
         _rb.gravityScale = gravityScale;
         _rb.freezeRotation = true;
@@ -88,6 +105,12 @@ public class PlayerController : MonoBehaviour
         _jumpHeld = Input.GetKey(KeyCode.Space);
 
         if (_bufferTimer > 0f) _bufferTimer -= Time.deltaTime;
+
+        // tiro (J ou clique esquerdo)
+        if (_fireTimer > 0f) _fireTimer -= Time.deltaTime;
+        if (_shootAnimTimer > 0f) _shootAnimTimer -= Time.deltaTime;
+        if ((Input.GetKey(KeyCode.J) || Input.GetMouseButton(0)) && _hasWeapon && _ammo > 0 && _fireTimer <= 0f)
+            Shoot();
 
         // entra no modo escalada ao pressionar cima/baixo sobre uma escada
         if (_ladderCount > 0 && Mathf.Abs(_v) > 0.1f) _climbing = true;
@@ -177,8 +200,43 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    void SetupVisual()
+    {
+        if (_sr == null) return;
+        _visual = _sr.transform;
+        var luna = Resources.Load<Sprite>("luna");
+        if (luna != null)
+        {
+            _useCustom = true;
+            if (_anim != null) _anim.enabled = false;
+            _sr.sprite = luna;
+            if (luna.texture != null) luna.texture.filterMode = FilterMode.Point; // mantém pixel nítido
+            float target = 1.5f; // altura desejada em unidades
+            float s = target / luna.bounds.size.y;
+            _visBaseScale = new Vector3(s, s, 1f);
+            float colBottom = _col.offset.y - _col.size.y / 2f;
+            _visBaseY = colBottom + target / 2f; // pés no chão
+            _visual.localScale = _visBaseScale;
+            _visual.localPosition = new Vector3(0f, _visBaseY, 0f);
+        }
+    }
+
+    // animação por transform para o personagem customizado (sem trocar quadros)
+    void CustomVisual()
+    {
+        float bob = 0f, stretchY = 1f, squashX = 1f;
+        if (_climbing) bob = Mathf.Sin(Time.time * 8f) * 0.05f;
+        else if (!_grounded) { stretchY = 1.08f; squashX = 0.94f; }
+        else if (Mathf.Abs(_rb.linearVelocity.x) > 0.3f) bob = Mathf.Abs(Mathf.Sin(Time.time * 12f)) * 0.07f;
+        else bob = Mathf.Sin(Time.time * 3f) * 0.03f;
+        _visual.localPosition = new Vector3(0f, _visBaseY + bob, 0f);
+        _visual.localScale = new Vector3(_visBaseScale.x * squashX, _visBaseScale.y * stretchY, 1f);
+    }
+
     void UpdateAnimation()
     {
+        if (_sr == null) return;
+        if (_useCustom) { CustomVisual(); return; }
         if (_anim == null) return;
 
         if (_climbing)
@@ -189,6 +247,10 @@ public class PlayerController : MonoBehaviour
         {
             if (_rb.linearVelocity.y > 0.5f) _anim.Play(SpriteFactory.PlayerJump(), 1f, false);
             else _anim.Play(SpriteFactory.PlayerFall(), 1f, false);
+        }
+        else if (_shootAnimTimer > 0f)
+        {
+            _anim.Play(SpriteFactory.PlayerShoot(), 1f, false);
         }
         else if (Mathf.Abs(_rb.linearVelocity.x) > 0.3f)
         {
@@ -230,6 +292,25 @@ public class PlayerController : MonoBehaviour
     public void Bounce()
     {
         _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, jumpForce * 0.75f);
+    }
+
+    void Shoot()
+    {
+        Vector2 dir = _facingRight ? Vector2.right : Vector2.left;
+        Vector3 pos = transform.position + (Vector3)(dir * 0.6f) + Vector3.up * 0.1f;
+        Projectile.Spawn(pos, dir, bulletSpeed, true, transform.parent);
+        _ammo--;
+        _fireTimer = fireCooldown;
+        _shootAnimTimer = 0.18f;
+        AudioManager.Instance.PlayShoot();
+        GameManager.Instance.OnAmmoChanged(_hasWeapon, _ammo);
+    }
+
+    public void GiveWeapon(int amount)
+    {
+        _hasWeapon = true;
+        _ammo += amount;
+        GameManager.Instance.OnAmmoChanged(_hasWeapon, _ammo);
     }
 
     public void RespawnAt(Vector3 pos)

@@ -1,14 +1,16 @@
-# 🔆 Lumen — Jogo de Plataforma 2D
+# 🌆 Lumen — Plataforma 2D Cyberpunk
 
 > Projeto da disciplina **Game Development** — UniFECAF
 > Desenvolvido em **Unity 6 (6000.4)** com **C#** por **Samuel Nunes**
 
-**Lumen** é um jogo de plataforma 2D em que você controla uma pequena **centelha de luz**
-presa nas cavernas escuras do subsolo. Para escapar, ela precisa atravessar fendas e abismos,
-escalar cipós, desviar de espinhos e de criaturas das sombras, coletando **cristais de luz**
-até alcançar o portal de saída de cada fase e, enfim, voltar à superfície.
+**Lumen** é um jogo de plataforma 2D de estética **cyberpunk** (neon synthwave). Você controla
+um pequeno *netrunner* de luz que precisa atravessar os níveis de uma megacidade subterrânea:
+saltando por abismos, escalando, coletando **data-shards**, pegando **armas** para atirar em
+**drones** e bots de segurança — até enfrentar o **MAINFRAME**, o chefe final, numa arena.
+Cada fase tem um **céu de cor diferente** que pulsa em neon conforme você avança.
 
 ![Lumen — Fase 1](Docs/screenshots/fase_1.png)
+![Lumen — Chefe MAINFRAME](Docs/screenshots/boss.png)
 
 ---
 
@@ -17,9 +19,13 @@ até alcançar o portal de saída de cada fase e, enfim, voltar à superfície.
 - **Andar** e **correr** (movimento horizontal responsivo)
 - **Pular** (com *coyote time*, *jump buffer* e altura variável — sensação de controle "justo")
 - **Escalar** cipós/escadas (a gravidade é desativada enquanto agarrado)
+- **Atirar** — pegue uma **arma** (dropada por inimigos ou espalhada nas fases) e dispare projéteis neon
 - **Pisar** em inimigos para derrotá-los
-- **Coletar** cristais que valem pontos
-- **Vidas, dano e respawn**: ao cair no abismo você renasce no início da fase; ao zerar as vidas, é Game Over
+- **Drones voadores** e bots de segurança como inimigos
+- **Chefe final (MAINFRAME)** com barra de vida própria, que se move e atira
+- **Coletar** data-shards que valem pontos
+- **Barra de vida** segmentada; ao cair no abismo você renasce no início da fase; ao zerar a vida, é Game Over
+- **Céu dinâmico** que muda de cor por fase e pisca em neon
 
 ## ⌨️ Controles
 
@@ -29,18 +35,20 @@ até alcançar o portal de saída de cada fase e, enfim, voltar à superfície.
 | Correr | segurar `Shift` |
 | Pular | `Espaço` |
 | Escalar (em escadas) | `↑` `↓` ou `W` `S` |
+| **Atirar** | `J` ou clique esquerdo |
 | Reiniciar (após Game Over / Vitória) | `R` |
 | Ativar/desativar som | `M` |
 | Sair (no executável) | `Esc` |
 
 ## 🗺️ Fases
 
-São **4 fases** com dificuldade crescente:
+São **5 fases** com dificuldade crescente:
 
-1. **Despertar** — tutorial em terreno plano.
-2. **Fendas** — abismos para pular, primeiros espinhos e escalada obrigatória.
-3. **Abismo** — verticalidade, mais inimigos e uma torre de escalada longa.
-4. **A Luz** — combina todos os desafios em densidade máxima.
+1. **Boot** — tutorial em terreno plano; primeira arma e drone.
+2. **Submundo** — abismos para pular, espinhos e escalada obrigatória.
+3. **Arranha-Céu** — verticalidade, drones e uma torre de escalada longa.
+4. **O Núcleo** — combina todos os desafios em densidade máxima.
+5. **MAINFRAME** — arena do **chefe final**: pegue armas, desvie dos tiros e destrua o boss.
 
 ---
 
@@ -78,16 +86,20 @@ são gerados proceduralmente por código**, o que o torna 100% reprodutível.
 | `PlayerController.cs` | Movimento (andar/correr/pular/escalar) e animação |
 | `LevelData.cs` | Mapas das fases em texto (ASCII) |
 | `LevelBuilder.cs` | Constrói a fase a partir do mapa |
-| `Enemy.cs` | Inimigo patrulheiro (com pisão) |
-| `Collectible.cs` | Cristal coletável |
-| `Hazard.cs` | Espinhos (dano) |
+| `Enemy.cs` | Inimigo terrestre/drone voador (com pisão e drop de arma) |
+| `Boss.cs` | Chefe final (vida, movimento, ataques) |
+| `Projectile.cs` | Projétil neon (jogador e inimigos) |
+| `WeaponPickup.cs` | Arma coletável (dá munição) |
+| `Collectible.cs` | Data-shard coletável |
+| `Hazard.cs` | Espinhos de energia (dano) |
 | `Ladder.cs` | Marcador de escada |
 | `LevelExit.cs` | Portal de saída da fase |
-| `HUDController.cs` | Interface (vidas, cristais, pontuação, mensagens) |
-| `AudioManager.cs` | Síntese de áudio (chiptune) |
-| `SpriteFactory.cs` | Geração procedural de sprites (pixel art) |
+| `HUDController.cs` | Interface (barra de vida, cristais, munição, barra do chefe) |
+| `AudioManager.cs` | Síntese de áudio (chiptune/SFX) |
+| `SpriteFactory.cs` | Geração procedural de sprites (pixel art cyberpunk) |
 | `SpriteAnimator.cs` | Animação por troca de quadros |
 | `CameraFollow.cs` | Câmera que segue o jogador com limites |
+| `SkyController.cs` | Flicker neon do céu/fundo |
 | `Spark.cs` | Partícula de feedback visual |
 
 ## 📁 Estrutura do projeto

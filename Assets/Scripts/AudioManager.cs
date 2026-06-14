@@ -15,6 +15,7 @@ public class AudioManager : MonoBehaviour
     AudioSource _music; // trilha em loop
 
     AudioClip _jump, _coin, _hurt, _stomp, _levelUp, _win, _over, _theme;
+    AudioClip _shoot, _pickup, _bossHit, _bossDie;
 
     public bool Muted { get; private set; }
 
@@ -42,6 +43,10 @@ public class AudioManager : MonoBehaviour
         _levelUp = Sequence("levelup", new[] { 523f, 659f, 784f, 1047f }, 0.09f, 0.5f);
         _win = Sequence("win", new[] { 523f, 659f, 784f, 1047f, 784f, 1047f, 1319f }, 0.11f, 0.5f);
         _over = Sequence("over", new[] { 392f, 330f, 262f, 196f }, 0.18f, 0.55f);
+        _shoot = Sweep("shoot", 1400f, 700f, 0.07f, 0.4f);
+        _pickup = Sequence("pickup", new[] { 880f, 1320f, 1760f }, 0.05f, 0.5f);
+        _bossHit = NoiseSweep("bosshit", 300f, 160f, 0.12f, 0.6f);
+        _bossDie = Sequence("bossdie", new[] { 523f, 392f, 330f, 262f, 196f, 130f }, 0.16f, 0.6f);
         _theme = BuildTheme();
     }
 
@@ -174,6 +179,10 @@ public class AudioManager : MonoBehaviour
     public void PlayLevelComplete() => Play(_levelUp, 0.7f);
     public void PlayWin() => Play(_win, 0.8f);
     public void PlayGameOver() => Play(_over, 0.7f);
+    public void PlayShoot() => Play(_shoot, 0.35f);
+    public void PlayPickup() => Play(_pickup, 0.6f);
+    public void PlayBossHit() => Play(_bossHit, 0.6f);
+    public void PlayBossDie() => Play(_bossDie, 0.8f);
 
     public void StartMusic()
     {

@@ -1,24 +1,19 @@
 using UnityEngine;
 
 /// <summary>
-/// Dados das fases em formato de texto (mapa ASCII). Cada caractere vira um
-/// elemento do jogo, montado em tempo de execucao pelo LevelBuilder.
-///
-/// Legenda:
-///   '#' = bloco solido (chao/plataforma)   'H' = escada (cipo) para escalar
-///   'o' = cristal coletavel                '^' = espinhos (perigo)
-///   'E' = inimigo                          'P' = inicio do jogador
-///   'X' = portal de saida                  ' ' = vazio
-/// A primeira string e o topo da fase; a ultima e a base.
+/// Dados das fases (mapa ASCII) - tema cyberpunk. Cada caractere vira um elemento
+/// montado em tempo de execucao pelo LevelBuilder.
+/// Legenda: '#'=bloco 'H'=escada 'o'=cristal '^'=espinho 'E'=inimigo 'F'=drone
+///          'W'=arma 'L'=coracao 'B'=chefe 'P'=inicio 'X'=saida ' '=vazio
 /// </summary>
 public static class LevelData
 {
     public static readonly string[] Names = {
-        "1 - Despertar", "2 - Fendas", "3 - Abismo", "4 - A Luz"
+        "1 - Boot", "2 - Submundo", "3 - Arranha-Ceu", "4 - O Nucleo", "5 - MAINFRAME"
     };
 
     public static readonly string[][] Maps = {
-        // FASE 1: 1 - Despertar (largura 48)
+        // FASE 1: 1 - Boot (largura 48)
         new string[] {
             "                                                ",
             "                                                ",
@@ -28,15 +23,15 @@ public static class LevelData
             "                                                ",
             "                                                ",
             "                                        ooHooo  ",
-            "                                        ##H###  ",
+            "                                    F   ##H###  ",
             "                                          H     ",
             "           oooo   ooo         oooo        H     ",
             "           ####               ####        H     ",
-            "  P   ooo                 E               H   X ",
+            "  P   ooo             W   E               H   X ",
             "################################################",
             "################################################",
         },
-        // FASE 2: 2 - Fendas (largura 58)
+        // FASE 2: 2 - Submundo (largura 58)
         new string[] {
             "                                                          ",
             "                                                          ",
@@ -46,15 +41,15 @@ public static class LevelData
             "                                                          ",
             "                                                 oooHoXoo ",
             "                                                 ###H#### ",
-            "                                                    H     ",
+            "                            F                       H     ",
             "                                                    H     ",
             "            ooo            ooo              ooo     H     ",
             "                  oo             ooo                H     ",
-            "  P  ooo            E  ^^            E  ^^          H     ",
+            "  P  ooo W          E  ^^            E  ^^        L H     ",
             "############   ############   ##############   ###########",
             "############   ############   ##############   ###########",
         },
-        // FASE 3: 3 - Abismo (largura 66)
+        // FASE 3: 3 - Arranha-Ceu (largura 66)
         new string[] {
             "                                                                  ",
             "                                                                  ",
@@ -64,15 +59,15 @@ public static class LevelData
             "                                                      ###H######  ",
             "                                                         H        ",
             "                                                         H        ",
-            "                                                         H        ",
-            "                                                         H        ",
+            "                 F                                       H        ",
+            "                                        F                H        ",
             "          ooo         ooo                    ooo         H        ",
             "    oo             oo    ooo        ooo                  H        ",
-            "  P   E         ^^^         E          ^^^ E             H        ",
+            "  P   E W       ^^^         E          ^^^ E      W      H        ",
             "##########   #########   ########   #########   ##################",
             "##########   #########   ########   #########   ##################",
         },
-        // FASE 4: 4 - A Luz (largura 74)
+        // FASE 4: 4 - O Nucleo (largura 74)
         new string[] {
             "                                                                          ",
             "                                                                          ",
@@ -82,13 +77,31 @@ public static class LevelData
             "                                                                H         ",
             "                                                                H         ",
             "                                                                H         ",
-            "                                                                H         ",
-            "                                                                H         ",
+            "                      F                                         H         ",
+            "                                      F                         H         ",
             "        ooo              ooo               ooo        ooo       H         ",
-            "    o             oo        oooo   oooo         oo              H         ",
-            "  P  E       ^^E      ^^      E      ^^^ E        ^^            H         ",
+            "    o             oo        oooo   oooo                         H         ",
+            "  P  EW      ^^E      ^^      E      ^^^ E      W ^^            H         ",
             "########   ######   #####   ####   ########   ########   #################",
             "########   ######   #####   ####   ########   ########   #################",
+        },
+        // FASE 5: 5 - MAINFRAME (largura 42)
+        new string[] {
+            "                                          ",
+            "                                          ",
+            "                                          ",
+            "                                          ",
+            "                                          ",
+            "                                          ",
+            "                                          ",
+            "              F             F             ",
+            "        ooo                    ooo        ",
+            "        ###                    ###        ",
+            "                                          ",
+            "                    B                     ",
+            "   P   W                          W   L   ",
+            "##########################################",
+            "##########################################",
         },
     };
 }

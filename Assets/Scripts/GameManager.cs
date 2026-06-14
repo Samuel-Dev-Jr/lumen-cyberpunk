@@ -25,6 +25,10 @@ public class GameManager : MonoBehaviour
     GameObject _container;
     PlayerController _player;
     Vector3 _levelStart;
+    SpriteRenderer _backdropSR;
+    int _bossMax;
+
+    public PlayerController Player => _player;
 
     void Awake()
     {
@@ -50,7 +54,17 @@ public class GameManager : MonoBehaviour
         SetupCamera();
 
         AudioManager.Instance.StartMusic();
-        LoadLevel(0);
+        LoadLevel(StartLevel());
+    }
+
+    // permite iniciar numa fase especifica via linha de comando: -startlevel N (debug)
+    int StartLevel()
+    {
+        var args = System.Environment.GetCommandLineArgs();
+        for (int i = 0; i < args.Length - 1; i++)
+            if (args[i] == "-startlevel" && int.TryParse(args[i + 1], out int n))
+                return Mathf.Clamp(n, 0, LevelData.Maps.Length - 1);
+        return 0;
     }
 
     void SetupCamera()
@@ -73,16 +87,17 @@ public class GameManager : MonoBehaviour
         _camFollow = _camera.GetComponent<CameraFollow>();
         if (_camFollow == null) _camFollow = _camera.gameObject.AddComponent<CameraFollow>();
 
-        // Fundo (segue a câmera)
+        // Fundo (segue a câmera) com flicker neon
         var bg = new GameObject("Backdrop");
         bg.transform.SetParent(_camera.transform);
         bg.transform.localPosition = new Vector3(0, 0, 20);
-        var sr = bg.AddComponent<SpriteRenderer>();
-        sr.sprite = SpriteFactory.Background();
-        sr.sortingOrder = -100;
-        float h = _camera.orthographicSize * 2f * 1.2f;
+        _backdropSR = bg.AddComponent<SpriteRenderer>();
+        _backdropSR.sprite = SpriteFactory.Background(0);
+        _backdropSR.sortingOrder = -100;
+        bg.AddComponent<SkyController>();
+        float h = _camera.orthographicSize * 2f * 1.25f;
         float w = h * _camera.aspect;
-        var bgSprite = sr.sprite;
+        var bgSprite = _backdropSR.sprite;
         bg.transform.localScale = new Vector3(w / bgSprite.bounds.size.x, h / bgSprite.bounds.size.y, 1f);
     }
 
@@ -105,13 +120,18 @@ public class GameManager : MonoBehaviour
         _camFollow.SetBounds(info.minX, info.maxX, info.minY, info.maxY);
         _camFollow.SnapToTarget();
 
+        // céu/cidade muda de cor por fase
+        if (_backdropSR != null) _backdropSR.sprite = SpriteFactory.Background(index);
+
         _hud.SetLives(_lives);
         _hud.SetScore(_score);
         _hud.SetCrystals(_crystals, _totalCrystals);
+        _hud.SetAmmo(_player.HasWeapon, _player.Ammo);
+        _hud.ShowBoss(false);
         _hud.HideCenter();
         _hud.ShowBanner("Fase " + (index + 1) + " — " + LevelData.Names[index]);
         _hud.SetHint(index == 0
-            ? "Setas/A-D: mover   |   Shift: correr   |   Espaco: pular   |   Cima/Baixo na escada: escalar"
+            ? "Setas/A-D: mover  |  Shift: correr  |  Espaco: pular  |  Cima/Baixo: escalar  |  J: atirar"
             : "");
     }
 
@@ -128,6 +148,34 @@ public class GameManager : MonoBehaviour
     {
         _score += value;
         _hud.SetScore(_score);
+    }
+
+    public void OnAmmoChanged(bool hasWeapon, int ammo) => _hud.SetAmmo(hasWeapon, ammo);
+
+    public void GainLife()
+    {
+        if (_lives < 5) _lives++;
+        _hud.SetLives(_lives);
+    }
+
+    public void RegisterBoss(int maxHp)
+    {
+        _bossMax = maxHp;
+        _hud.ShowBoss(true);
+        _hud.SetBossHealth(maxHp, maxHp);
+    }
+
+    public void UpdateBossHealth(int cur) => _hud.SetBossHealth(cur, _bossMax);
+
+    public void BossDefeated()
+    {
+        if (_state != State.Playing) return;
+        _state = State.Transition;
+        _score += 2000;
+        _hud.SetScore(_score);
+        _hud.ShowBoss(false);
+        if (_player != null) _player.SetControl(false);
+        StartCoroutine(WinAfter(1.4f));
     }
 
     public void DamagePlayer(bool fellInPit)

@@ -6,6 +6,7 @@ public class LevelInfo
     public GameObject player;
     public Vector3 playerStart;
     public int crystals;
+    public bool hasBoss;
     public float minX, maxX, minY, maxY;
 }
 
@@ -57,7 +58,11 @@ public static class LevelBuilder
                     case 'H': MakeLadder(x, y, parent); break;
                     case 'o': MakeCrystal(x, y, parent); info.crystals++; break;
                     case '^': MakeSpike(x, y, parent); break;
-                    case 'E': MakeEnemy(x, y, parent); break;
+                    case 'E': MakeEnemy(x, y, parent, false); break;
+                    case 'F': MakeEnemy(x, y, parent, true); break;
+                    case 'W': MakeWeapon(x, y, parent); break;
+                    case 'L': MakeHeart(x, y, parent); break;
+                    case 'B': MakeBoss(x, y, parent); info.hasBoss = true; break;
                     case 'X': MakeExit(x, y, parent); break;
                     case 'P':
                         info.playerStart = new Vector3(x, y, 0f);
@@ -133,14 +138,36 @@ public static class LevelBuilder
         go.AddComponent<Hazard>();
     }
 
-    static void MakeEnemy(float x, float y, Transform parent)
+    static void MakeEnemy(float x, float y, Transform parent, bool flying)
     {
-        var go = NewObj("Enemy", x, y, parent, 4);
-        go.AddComponent<SpriteAnimator>().Play(SpriteFactory.Enemy(), 4f, true);
+        var go = NewObj(flying ? "Drone" : "Enemy", x, y, parent, 4);
+        go.AddComponent<SpriteAnimator>().Play(flying ? SpriteFactory.Drone() : SpriteFactory.Enemy(), flying ? 8f : 4f, true);
         var col = go.AddComponent<BoxCollider2D>();
         col.isTrigger = true;
         col.size = new Vector2(0.7f, 0.7f);
-        go.AddComponent<Enemy>();
+        var e = go.AddComponent<Enemy>();
+        e.flying = flying;
+        if (flying) e.speed = 3f;
+    }
+
+    static void MakeWeapon(float x, float y, Transform parent)
+    {
+        var go = NewObj("Weapon", x, y, parent, 5);
+        go.GetComponent<SpriteRenderer>().sprite = SpriteFactory.Weapon();
+        var col = go.AddComponent<CircleCollider2D>();
+        col.isTrigger = true;
+        col.radius = 0.45f;
+        go.AddComponent<WeaponPickup>();
+    }
+
+    static void MakeBoss(float x, float y, Transform parent)
+    {
+        var go = NewObj("Boss", x, y, parent, 6);
+        go.AddComponent<SpriteAnimator>().Play(SpriteFactory.Boss(), 2f, true);
+        var col = go.AddComponent<BoxCollider2D>();
+        col.isTrigger = true;
+        col.size = new Vector2(2.6f, 2.6f);
+        go.AddComponent<Boss>();
     }
 
     static void MakeExit(float x, float y, Transform parent)
@@ -160,12 +187,6 @@ public static class LevelBuilder
         go.transform.SetParent(parent);
         go.transform.position = pos;
 
-        var sr = go.AddComponent<SpriteRenderer>();
-        sr.sortingOrder = 10;
-        sr.sprite = SpriteFactory.PlayerIdle()[0];
-
-        go.AddComponent<SpriteAnimator>();
-
         var rb = go.AddComponent<Rigidbody2D>();
         rb.freezeRotation = true;
 
@@ -173,7 +194,26 @@ public static class LevelBuilder
         col.size = new Vector2(0.6f, 0.85f);
         col.offset = new Vector2(0f, -0.05f);
 
+        // visual em objeto-filho: permite trocar/escalar o sprite (ex.: Luna) sem mexer na colisão
+        var vis = new GameObject("Visual");
+        vis.transform.SetParent(go.transform);
+        vis.transform.localPosition = Vector3.zero;
+        var sr = vis.AddComponent<SpriteRenderer>();
+        sr.sortingOrder = 10;
+        sr.sprite = SpriteFactory.PlayerIdle()[0];
+        vis.AddComponent<SpriteAnimator>();
+
         go.AddComponent<PlayerController>();
         return go;
+    }
+
+    static void MakeHeart(float x, float y, Transform parent)
+    {
+        var go = NewObj("Heart", x, y, parent, 5);
+        go.GetComponent<SpriteRenderer>().sprite = SpriteFactory.Heart();
+        var col = go.AddComponent<CircleCollider2D>();
+        col.isTrigger = true;
+        col.radius = 0.45f;
+        go.AddComponent<HeartPickup>();
     }
 }
