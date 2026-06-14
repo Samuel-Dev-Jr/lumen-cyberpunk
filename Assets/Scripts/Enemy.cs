@@ -20,6 +20,7 @@ public class Enemy : MonoBehaviour
         _spawnX = transform.position.x;
         _baseY = transform.position.y;
         _dir = (Mathf.FloorToInt(transform.position.x) % 2 == 0) ? 1f : -1f;
+        if (GameManager.Instance != null) speed *= GameManager.Instance.EnemySpeedMul; // dificuldade
     }
 
     void Update()

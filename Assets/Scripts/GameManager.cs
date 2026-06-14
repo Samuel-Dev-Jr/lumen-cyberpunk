@@ -10,8 +10,13 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    enum State { Playing, Transition, GameOver, Win }
+    enum State { Menu, Playing, Transition, GameOver, Win }
     State _state;
+
+    // dificuldade (definida no menu inicial)
+    public float EnemySpeedMul = 1f;
+    public int BossHp = 12;
+    int _startLives = 3;
 
     int _lives = 3;
     int _score;
@@ -54,17 +59,38 @@ public class GameManager : MonoBehaviour
         SetupCamera();
 
         AudioManager.Instance.StartMusic();
-        LoadLevel(StartLevel());
+
+        int lv = StartLevel();
+        if (lv >= 0) { ApplyDifficulty(1); BeginGame(lv); }  // debug: pula o menu
+        else { _state = State.Menu; _hud.ShowMenu(true); }   // mostra o menu inicial
     }
 
-    // permite iniciar numa fase especifica via linha de comando: -startlevel N (debug)
+    // -startlevel N (debug). Retorna -1 quando ausente (mostra o menu).
     int StartLevel()
     {
         var args = System.Environment.GetCommandLineArgs();
         for (int i = 0; i < args.Length - 1; i++)
             if (args[i] == "-startlevel" && int.TryParse(args[i + 1], out int n))
                 return Mathf.Clamp(n, 0, LevelData.Maps.Length - 1);
-        return 0;
+        return -1;
+    }
+
+    void ApplyDifficulty(int d)
+    {
+        switch (d)
+        {
+            case 0: _startLives = 5; EnemySpeedMul = 0.85f; BossHp = 8; break;   // Fácil
+            case 2: _startLives = 2; EnemySpeedMul = 1.30f; BossHp = 18; break;  // Difícil
+            default: _startLives = 3; EnemySpeedMul = 1.0f; BossHp = 12; break;  // Normal
+        }
+    }
+
+    void BeginGame(int level)
+    {
+        _hud.ShowMenu(false);
+        _lives = _startLives;
+        _score = 0;
+        LoadLevel(level);
     }
 
     void SetupCamera()
@@ -246,13 +272,22 @@ public class GameManager : MonoBehaviour
 
     void RestartGame()
     {
-        _lives = 3;
+        _lives = _startLives;
         _score = 0;
         LoadLevel(0);
     }
 
     void Update()
     {
+        // menu inicial: escolha de dificuldade
+        if (_state == State.Menu)
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1)) { ApplyDifficulty(0); BeginGame(0); }
+            else if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2)) { ApplyDifficulty(1); BeginGame(0); }
+            else if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3)) { ApplyDifficulty(2); BeginGame(0); }
+            return;
+        }
+
         if ((_state == State.GameOver || _state == State.Win) && Input.GetKeyDown(KeyCode.R))
             RestartGame();
 

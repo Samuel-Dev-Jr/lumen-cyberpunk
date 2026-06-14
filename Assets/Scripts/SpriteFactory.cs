@@ -320,11 +320,11 @@ public static class SpriteFactory
     // ========================= FUNDO (cidade cyberpunk por fase) =========================
     // Paletas de céu por fase: {topo, base, neon das janelas}
     static readonly Color32[][] SkyPalettes = {
-        new[]{ new Color32(20,18,46,255),  new Color32(10,10,24,255),  new Color32(40,220,255,255) }, // ciano
-        new[]{ new Color32(36,16,54,255),  new Color32(12,8,26,255),   new Color32(150,80,255,255) }, // roxo
-        new[]{ new Color32(52,14,52,255),  new Color32(16,6,24,255),   new Color32(255,60,200,255) }, // magenta
-        new[]{ new Color32(58,22,30,255),  new Color32(20,8,16,255),   new Color32(255,140,60,255) }, // laranja
-        new[]{ new Color32(60,10,16,255),  new Color32(22,4,8,255),    new Color32(255,70,90,255)  }, // vermelho (boss)
+        new[]{ new Color32(36,52,110,255), new Color32(12,16,40,255),  new Color32(70,240,255,255)  }, // ciano
+        new[]{ new Color32(70,34,120,255), new Color32(16,10,40,255),  new Color32(185,110,255,255) }, // roxo
+        new[]{ new Color32(104,28,104,255),new Color32(22,8,34,255),   new Color32(255,90,225,255)  }, // magenta
+        new[]{ new Color32(112,52,46,255), new Color32(26,12,18,255),  new Color32(255,175,80,255)  }, // laranja
+        new[]{ new Color32(118,24,40,255), new Color32(28,6,14,255),   new Color32(255,95,120,255)  }, // vermelho (boss)
     };
 
     public static Sprite Background(int level)
@@ -343,8 +343,9 @@ public static class SpriteFactory
             byte bl = (byte)Mathf.Lerp(pal[1].b, pal[0].b, t);
             for (int x = 0; x < w; x++) Px(b, w, h, x, y, new Color32(r, g, bl, 255));
         }
-        // brilho/lua neon
-        Disc(b, w, h, 22f, 40f, 10f, new Color32(pal[2].r, pal[2].g, pal[2].b, 40));
+        // brilho/lua neon (mais vibrante)
+        Disc(b, w, h, 22f, 40f, 12f, new Color32(pal[2].r, pal[2].g, pal[2].b, 70));
+        Disc(b, w, h, 22f, 40f, 7f, new Color32(pal[2].r, pal[2].g, pal[2].b, 110));
         // prédios (silhuetas) com janelas neon
         var rng = new System.Random(100 + level);
         int x0 = 0;

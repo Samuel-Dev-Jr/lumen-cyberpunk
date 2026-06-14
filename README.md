@@ -9,6 +9,7 @@ saltando por abismos, escalando, coletando **data-shards**, pegando **armas** pa
 **drones** e bots de segurança — até enfrentar o **MAINFRAME**, o chefe final, numa arena.
 Cada fase tem um **céu de cor diferente** que pulsa em neon conforme você avança.
 
+![Lumen — Menu](Docs/screenshots/menu.png)
 ![Lumen — Fase 1](Docs/screenshots/fase_1.png)
 ![Lumen — Chefe MAINFRAME](Docs/screenshots/boss.png)
 
@@ -24,13 +25,15 @@ Cada fase tem um **céu de cor diferente** que pulsa em neon conforme você avan
 - **Drones voadores** e bots de segurança como inimigos
 - **Chefe final (MAINFRAME)** com barra de vida própria, que se move e atira
 - **Coletar** data-shards que valem pontos
-- **Barra de vida** segmentada; ao cair no abismo você renasce no início da fase; ao zerar a vida, é Game Over
+- **Barra de vida** segmentada (com **corações** que aumentam a vida); ao cair no abismo você renasce; ao zerar a vida, é Game Over
+- **Menu inicial** com seleção de **dificuldade** (Fácil / Normal / Difícil)
 - **Céu dinâmico** que muda de cor por fase e pisca em neon
 
 ## ⌨️ Controles
 
 | Ação | Tecla |
 |---|---|
+| Escolher dificuldade (menu) | `1` `2` `3` |
 | Mover | `←` `→` ou `A` `D` |
 | Correr | segurar `Shift` |
 | Pular | `Espaço` |

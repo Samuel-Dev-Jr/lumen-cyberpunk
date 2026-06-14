@@ -18,6 +18,7 @@ public class Boss : MonoBehaviour
 
     void Start()
     {
+        if (GameManager.Instance != null) maxHp = GameManager.Instance.BossHp; // dificuldade
         _hp = maxHp;
         _sr = GetComponent<SpriteRenderer>();
         _spawnX = transform.position.x;

@@ -17,7 +17,7 @@ public class HUDController : MonoBehaviour
     Text _score, _crystals, _banner, _center, _centerSub, _hint, _ammo, _bossLabel;
     Image[] _lifeSegs;
     Image _weaponIcon, _bossBarFill;
-    GameObject _bossBar, _ammoGroup;
+    GameObject _bossBar, _ammoGroup, _menu;
     Font _font;
     Transform _root;
     Coroutine _bannerCo;
@@ -46,14 +46,14 @@ public class HUDController : MonoBehaviour
         MakeIcon(SpriteFactory.Heart(), new Vector2(0, 1), new Vector2(24, -22), 26);
         _lifeSegs = new Image[MAX_LIVES];
         for (int i = 0; i < MAX_LIVES; i++)
-            _lifeSegs[i] = MakeBar(new Vector2(0, 1), new Vector2(56 + i * 40, -22), new Vector2(34, 16), NEON_MAG);
+            _lifeSegs[i] = MakeBar(new Vector2(0, 1), new Vector2(56 + i * 40, -22), new Vector2(34, 16), DIM);
 
         // ---- cristais ----
         MakeIcon(SpriteFactory.CrystalIcon(), new Vector2(0, 1), new Vector2(24, -56), 26);
         _crystals = MakeText("crystals", new Vector2(0, 1), new Vector2(52, -52), new Vector2(220, 30), 24, TextAnchor.MiddleLeft);
 
         // ---- munição (escondido até pegar arma) ----
-        _ammoGroup = new GameObject("ammoGroup"); _ammoGroup.transform.SetParent(_root);
+        _ammoGroup = MakeGroup("ammoGroup");
         _weaponIcon = MakeIcon(SpriteFactory.WeaponIcon(), new Vector2(0, 1), new Vector2(24, -90), 26, _ammoGroup.transform);
         _ammo = MakeText("ammo", new Vector2(0, 1), new Vector2(52, -86), new Vector2(180, 30), 24, TextAnchor.MiddleLeft, _ammoGroup.transform);
         _ammoGroup.SetActive(false);
@@ -62,7 +62,7 @@ public class HUDController : MonoBehaviour
         _score = MakeText("score", new Vector2(1, 1), new Vector2(-20, -22), new Vector2(300, 32), 26, TextAnchor.MiddleRight);
 
         // ---- barra do chefe (topo central) ----
-        _bossBar = new GameObject("bossBar"); _bossBar.transform.SetParent(_root);
+        _bossBar = MakeGroup("bossBar");
         var bgImg = MakeBar(new Vector2(0.5f, 1), new Vector2(0, -50), new Vector2(440, 22), DIM, _bossBar.transform);
         bgImg.rectTransform.pivot = new Vector2(0.5f, 1);
         _bossBarFill = MakeBar(new Vector2(0.5f, 1), new Vector2(0, -50), new Vector2(436, 18), new Color(1f, 0.3f, 0.35f), _bossBar.transform);
@@ -80,6 +80,33 @@ public class HUDController : MonoBehaviour
         _hint = MakeText("hint", new Vector2(0.5f, 0), new Vector2(0, 34), new Vector2(1200, 36), 21, TextAnchor.MiddleCenter);
         _center.gameObject.SetActive(false);
         _centerSub.gameObject.SetActive(false);
+
+        // ---- menu inicial (tela de título + dificuldade) ----
+        _menu = MakeGroup("menu");
+        var t = _menu.transform;
+        var title = MakeText("title", new Vector2(0.5f, 0.5f), new Vector2(0, 150), new Vector2(1000, 90), 72, TextAnchor.MiddleCenter, t);
+        title.text = "L U M E N"; title.color = NEON_CYAN;
+        var sub = MakeText("sub", new Vector2(0.5f, 0.5f), new Vector2(0, 96), new Vector2(1000, 40), 26, TextAnchor.MiddleCenter, t);
+        sub.text = "// PLATAFORMA 2D CYBERPUNK //"; sub.color = NEON_MAG;
+        MakeText("o1", new Vector2(0.5f, 0.5f), new Vector2(0, 18), new Vector2(1000, 40), 32, TextAnchor.MiddleCenter, t).text = "[ 1 ]   FACIL";
+        MakeText("o2", new Vector2(0.5f, 0.5f), new Vector2(0, -28), new Vector2(1000, 40), 32, TextAnchor.MiddleCenter, t).text = "[ 2 ]   NORMAL";
+        MakeText("o3", new Vector2(0.5f, 0.5f), new Vector2(0, -74), new Vector2(1000, 40), 32, TextAnchor.MiddleCenter, t).text = "[ 3 ]   DIFICIL";
+        var mh = MakeText("mh", new Vector2(0.5f, 0.5f), new Vector2(0, -140), new Vector2(1100, 40), 22, TextAnchor.MiddleCenter, t);
+        mh.text = "Escolha a dificuldade no teclado  -  J: atirar  Shift: correr  Espaco: pular"; mh.color = new Color(0.7f, 0.85f, 1f);
+        _menu.SetActive(false);
+    }
+
+    public void ShowMenu(bool v) => _menu.SetActive(v);
+
+    // container que cobre a tela inteira (para os filhos ancorarem corretamente)
+    GameObject MakeGroup(string name)
+    {
+        var go = new GameObject(name, typeof(RectTransform));
+        var rt = (RectTransform)go.transform;
+        rt.SetParent(_root, false);
+        rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero; rt.offsetMax = Vector2.zero;
+        return go;
     }
 
     Image MakeIcon(Sprite sprite, Vector2 anchor, Vector2 pos, float size, Transform parent = null)
