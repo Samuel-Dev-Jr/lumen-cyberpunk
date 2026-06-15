@@ -73,6 +73,7 @@ public class Boss : MonoBehaviour
         _hp -= dmg;
         _flash = 0.15f;
         AudioManager.Instance.PlayBossHit();
+        GameManager.Instance.Shake(0.2f);
         GameManager.Instance.UpdateBossHealth(Mathf.Max(0, _hp));
         if (_hp <= 0) Die();
     }
@@ -94,6 +95,7 @@ public class Boss : MonoBehaviour
             float ang = i * 15f * Mathf.Deg2Rad;
             go.AddComponent<Spark>().Init(new Vector2(Mathf.Cos(ang), Mathf.Sin(ang)) * Random.Range(3f, 7f), 0.8f);
         }
+        FloatingText.Spawn(transform.position + Vector3.up * 1.5f, "+2000", new Color(1f, 0.9f, 0.4f), transform.parent);
         GameManager.Instance.BossDefeated();
         Destroy(gameObject);
     }

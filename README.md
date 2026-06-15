@@ -20,14 +20,18 @@ Cada fase tem um **céu de cor diferente** que pulsa em neon conforme você avan
 - **Andar** e **correr** (movimento horizontal responsivo)
 - **Pular** (com *coyote time*, *jump buffer* e altura variável - sensação de controle "justo")
 - **Escalar** cipós/escadas (a gravidade é desativada enquanto agarrado)
+- **Dash** (investida rápida com rastro neon) - inclusive um no ar
 - **Atirar** - pegue uma **arma** (dropada por inimigos ou espalhada nas fases) e dispare projéteis neon
 - **Pisar** em inimigos para derrotá-los
-- **Drones voadores** e bots de segurança como inimigos
+- **Drones voadores**, **torretas** que atiram e bots de segurança como inimigos
+- **Plataformas móveis** que carregam você
 - **Chefe final (MAINFRAME)** com barra de vida própria, que se move e atira
 - **Coletar** data-shards que valem pontos
 - **Barra de vida** segmentada (com **corações** que aumentam a vida); ao cair no abismo você renasce; ao zerar a vida, é Game Over
-- **Menu inicial** com seleção de **dificuldade** (Fácil / Normal / Difícil)
-- **Céu dinâmico** que muda de cor por fase e pisca em neon
+- **Menu inicial** com seleção de **dificuldade** (Fácil / Normal / Difícil) e **menu de pausa** (`Esc`)
+- **Checkpoint por fase** no Fácil/Normal (ao dar Game Over você volta para a fase em que estava; no Difícil reinicia do começo)
+- **Efeitos visuais**: brilho neon (bloom), tremor de tela, partículas, fundo em parallax e textos de pontos flutuantes
+- **Céu dinâmico** que muda de cor por fase
 
 ## ⌨️ Controles
 
@@ -39,9 +43,10 @@ Cada fase tem um **céu de cor diferente** que pulsa em neon conforme você avan
 | Pular | `Espaço`, `W` ou `↑` |
 | Escalar (em escadas) | `↑` `↓` ou `W` `S` |
 | **Atirar** | `J` ou clique esquerdo |
+| **Dash** (investida) | `K` ou `Ctrl` |
+| **Pausar** | `Esc` |
 | Reiniciar (após Game Over / Vitória) | `R` |
 | Ativar/desativar som | `M` |
-| Sair (no executável) | `Esc` |
 
 ## 🗺️ Fases
 

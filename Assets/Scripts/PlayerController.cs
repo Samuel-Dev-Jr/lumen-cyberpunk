@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
     public float walkSpeed = 6.5f;
     public float runSpeed = 9.5f;
     public float jumpForce = 16f;
+    public int maxJumps = 2;            // 2 = pulo duplo (da pra pular mais uma vez no ar)
     public float climbSpeed = 4.5f;
     public float gravityScale = 3.8f;
     public float fallMultiplier = 2.2f;   // cai mais rapido, fica menos flutuante
@@ -29,6 +30,13 @@ public class PlayerController : MonoBehaviour
     public bool HasWeapon => _hasWeapon;
     public int Ammo => _ammo;
 
+    [Header("Dash")]
+    public float dashSpeed = 20f;
+    public float dashTime = 0.16f;
+    public float dashCooldown = 0.55f;
+    float _dashTimer, _dashCdTimer, _dashDir;
+    bool _dashing, _dashUsedInAir;
+
     // variaveis de controle interno
     Rigidbody2D _rb;
     BoxCollider2D _col;
@@ -39,6 +47,8 @@ public class PlayerController : MonoBehaviour
     bool _runHeld, _jumpHeld;
     float _coyoteTimer, _bufferTimer;
     bool _grounded, _climbing;
+    bool _wasGrounded;
+    int _jumpsLeft;
     int _ladderCount;
     bool _facingRight = true;
     float _invuln;
@@ -104,6 +114,13 @@ public class PlayerController : MonoBehaviour
         if ((Input.GetKey(KeyCode.J) || Input.GetMouseButton(0)) && _hasWeapon && _ammo > 0 && _fireTimer <= 0f)
             Shoot();
 
+        // dash (K ou Ctrl): da pra um no chao e um no ar
+        if (_dashCdTimer > 0f) _dashCdTimer -= Time.deltaTime;
+        if ((Input.GetKeyDown(KeyCode.K) || Input.GetKeyDown(KeyCode.LeftControl))
+            && _dashCdTimer <= 0f && !_climbing && (_grounded || !_dashUsedInAir))
+            StartDash();
+        if (_dashing) SpawnAfterimage(); // vai deixando o rastro neon
+
         // se ta em cima de uma escada e aperta pra cima/baixo, comeca a escalar
         if (_ladderCount > 0 && Mathf.Abs(_v) > 0.1f) _climbing = true;
         if (_ladderCount == 0) _climbing = false;
@@ -132,6 +149,25 @@ public class PlayerController : MonoBehaviour
 
         GroundCheck();
 
+        // soltou uma poeirinha quando acaba de cair no chao
+        if (_grounded && !_wasGrounded) Puff(5);
+        _wasGrounded = _grounded;
+        if (_grounded) _dashUsedInAir = false; // toca o chao e o dash do ar recarrega
+
+        // no dash eu ignoro o movimento normal e a gravidade por um tempinho
+        if (_dashing)
+        {
+            _dashTimer -= Time.fixedDeltaTime;
+            _rb.gravityScale = 0f;
+            _rb.linearVelocity = new Vector2(_dashDir * dashSpeed, 0f);
+            if (_dashTimer <= 0f)
+            {
+                _dashing = false;
+                _rb.linearVelocity = new Vector2(_dashDir * walkSpeed, 0f);
+            }
+            return;
+        }
+
         if (_climbing)
         {
             _rb.gravityScale = 0f;
@@ -152,12 +188,21 @@ public class PlayerController : MonoBehaviour
         float speed = _runHeld ? runSpeed : walkSpeed;
         _rb.linearVelocity = new Vector2(_h * speed, _rb.linearVelocity.y);
 
-        // conta o coyote time
-        if (_grounded) _coyoteTimer = coyoteTime;
-        else if (_coyoteTimer > 0f) _coyoteTimer -= Time.fixedDeltaTime;
+        // coyote time + recarrega os pulos quando ta no chao
+        if (_grounded)
+        {
+            _coyoteTimer = coyoteTime;
+            _jumpsLeft = maxJumps;
+        }
+        else
+        {
+            if (_coyoteTimer > 0f) _coyoteTimer -= Time.fixedDeltaTime;
+            // se caiu da borda andando (sem pular), tiro um pulo pra sobrar so 1 no ar
+            else if (_jumpsLeft == maxJumps) _jumpsLeft = maxJumps - 1;
+        }
 
-        // so pula se tiver buffer e ainda dentro do coyote
-        if (_bufferTimer > 0f && _coyoteTimer > 0f)
+        // pula com chao/coyote OU gastando um pulo do ar (pulo duplo)
+        if (_bufferTimer > 0f && (_coyoteTimer > 0f || _jumpsLeft > 0))
             DoJump();
 
         // essa parte aumenta a gravidade pra cair mais rapido e o pulo nao ficar boiando
@@ -169,11 +214,57 @@ public class PlayerController : MonoBehaviour
 
     void DoJump()
     {
+        bool airJump = !_grounded && _coyoteTimer <= 0f; // se nao ta no chao nem no coyote, é o pulo do ar
         _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, jumpForce);
         _bufferTimer = 0f;
         _coyoteTimer = 0f;
+        _jumpsLeft = Mathf.Max(0, _jumpsLeft - 1);
         _grounded = false;
         AudioManager.Instance.PlayJump();
+        Puff(airJump ? 8 : 4); // o pulo do ar solta mais poeira pra dar uma diferenca
+    }
+
+    void StartDash()
+    {
+        _dashing = true;
+        _dashTimer = dashTime;
+        _dashCdTimer = dashCooldown;
+        _dashDir = _facingRight ? 1f : -1f;
+        if (!_grounded) _dashUsedInAir = true;
+        AudioManager.Instance.PlayDash();
+        SpawnAfterimage();
+    }
+
+    // deixa uma "sombra" do sprite atual que vai sumindo -> efeito de rastro
+    void SpawnAfterimage()
+    {
+        var go = new GameObject("afterimage");
+        go.transform.position = transform.position;
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = _sr.sprite;
+        sr.flipX = _sr.flipX;
+        sr.color = new Color(0.3f, 0.95f, 1f, 0.55f);
+        sr.sortingOrder = _sr.sortingOrder - 1;
+        go.AddComponent<Spark>().Init(Vector2.zero, 0.25f);
+    }
+
+    // joga umas poeirinhas perto dos pes (no pulo e ao aterrissar)
+    void Puff(int count)
+    {
+        Vector3 feet = new Vector3(transform.position.x, _col.bounds.min.y, 0f);
+        for (int i = 0; i < count; i++)
+        {
+            var go = new GameObject("dust");
+            go.transform.position = feet;
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = SpriteFactory.White();
+            sr.color = new Color(0.7f, 0.85f, 1f, 0.6f);
+            sr.sortingOrder = 9;
+            go.transform.localScale = Vector3.one * 0.1f;
+            float ang = Random.Range(0f, Mathf.PI);
+            var v = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang) * 0.5f + 0.3f) * Random.Range(1f, 2.5f);
+            go.AddComponent<Spark>().Init(v, 0.35f);
+        }
     }
 
     void GroundCheck()

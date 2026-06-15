@@ -73,6 +73,8 @@ public class Enemy : MonoBehaviour
         _dead = true;
         AudioManager.Instance.PlayStomp();
         GameManager.Instance.AddScore(150);
+        FloatingText.Spawn(transform.position + Vector3.up * 0.5f, "+150", new Color(1f, 0.9f, 0.4f), transform.parent);
+        GameManager.Instance.Shake(0.15f);
 
         // uns 40% de chance de soltar uma arma quando morre
         if (Random.value < 0.4f)

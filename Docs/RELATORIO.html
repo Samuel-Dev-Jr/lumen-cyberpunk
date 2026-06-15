@@ -105,11 +105,14 @@ editor e fez o projeto rodar em qualquer máquina sem depender de arquivos exter
   <tr><td>Pular</td><td>Pulo com altura variável e gravidade ajustada na queda.</td><td>Espaço / W</td></tr>
   <tr><td>Escalar</td><td>Sobe/desce cipós, desativando a gravidade enquanto agarrado.</td><td>↑ ↓ ou W / S</td></tr>
   <tr><td>Atirar</td><td>Após pegar uma arma, dispara projéteis neon na direção atual.</td><td>J ou clique</td></tr>
+  <tr><td>Dash</td><td>Investida rápida com rastro neon (um no chão e um no ar).</td><td>K ou Ctrl</td></tr>
   <tr><td>Pisão</td><td>Derrota inimigos ao cair sobre eles, com pequeno repique.</td><td>(cair sobre o inimigo)</td></tr>
 </table>
-<p>Há ainda dois tipos de inimigo (bots terrestres e <em>drones</em> voadores), itens de
-<strong>arma</strong> que concedem munição, e um <strong>chefe final</strong> com barra de vida,
-movimento e ataques à distância, exigindo o domínio combinado de movimento e tiro.</p>
+<p>Para variar o desafio, coloquei três tipos de inimigo (bots terrestres, <em>drones</em>
+voadores e <em>torretas</em> que atiram), <strong>plataformas móveis</strong> que carregam o jogador,
+itens de <strong>arma</strong> que dão munição, <strong>corações</strong> que aumentam a vida e um
+<strong>chefe final</strong> com barra de vida própria. Em Fácil/Normal há <strong>checkpoint por
+fase</strong>, e o jogo tem menu de dificuldade e menu de pausa.</p>
 
 <h1>4. Abordagem de design de níveis com progressão de dificuldade</h1>
 <p>Foram criadas <strong>cinco fases</strong> com dificuldade crescente, cada uma introduzindo ou
@@ -231,7 +234,10 @@ estética <em>pixel art</em> limpa. São gerados: o personagem (quadros de parad
 escalar e atirar), bots e <em>drones</em> voadores, o <strong>chefe</strong>, data-shards, armas,
 projéteis, lajes com faixa neon, escadas, espinhos de energia, o portal de saída e um
 <strong>fundo de cidade</strong> com silhuetas de prédios, janelas acesas e céu que muda de cor por
-fase (com <em>flicker</em> neon controlado pelo <code>SkyController</code>).</p>
+fase. Para reforçar a estética, usei <strong>parallax</strong> (camadas de fundo em velocidades
+diferentes, dando profundidade) e um efeito de <strong>bloom</strong> (post-processing do URP) que
+faz o neon "acender". Somei ainda bastante <em>juice</em>: tremor de tela, partículas, poeira de
+pulo/pouso e textos de pontuação flutuantes.</p>
 
 <h3>Animação</h3>
 <p>As animações usam <strong>troca de quadros</strong> (sprite-sheet animation) - a mesma técnica

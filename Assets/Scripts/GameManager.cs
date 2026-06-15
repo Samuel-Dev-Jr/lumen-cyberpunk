@@ -1,5 +1,7 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Rendering;            // Volume / VolumeProfile
+using UnityEngine.Rendering.Universal;  // Bloom e o post-processing do URP
 
 // esse aqui eh o "cerebro" do jogo. fiz como Singleton pra qualquer script
 // conseguir falar com ele facil. cuida das vidas, pontos, cristais, troca de
@@ -8,13 +10,15 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    enum State { Menu, Playing, Transition, GameOver, Win }
+    enum State { Menu, Playing, Transition, GameOver, Win, Paused }
     State _state;
 
     // dificuldade escolhida la no menu inicial
     public float EnemySpeedMul = 1f;
     public int BossHp = 12;
     int _startLives = 3;
+    bool _checkpoints = true;   // facil/normal salvam a fase; no dificil nao tem checkpoint
+    int _checkpointLevel;       // pra qual fase eu volto no game over (quando tem checkpoint)
 
     int _lives = 3;
     int _score;
@@ -29,6 +33,7 @@ public class GameManager : MonoBehaviour
     PlayerController _player;
     Vector3 _levelStart;
     SpriteRenderer _backdropSR;
+    SpriteRenderer _nearSR;
     int _bossMax;
 
     public PlayerController Player => _player;
@@ -68,6 +73,7 @@ public class GameManager : MonoBehaviour
             case 2: _startLives = 2; EnemySpeedMul = 1.30f; BossHp = 18; break;  // dificil
             default: _startLives = 3; EnemySpeedMul = 1.0f; BossHp = 12; break;  // normal
         }
+        _checkpoints = (d != 2); // so o dificil (2) que nao tem checkpoint
     }
 
     void BeginGame(int level)
@@ -75,6 +81,7 @@ public class GameManager : MonoBehaviour
         _hud.ShowMenu(false);
         _lives = _startLives;
         _score = 0;
+        _checkpointLevel = 0;
         LoadLevel(level);
     }
 
@@ -94,8 +101,26 @@ public class GameManager : MonoBehaviour
         _camera.backgroundColor = new Color32(12, 14, 26, 255);
         _camera.transform.position = new Vector3(0, 0, -10);
 
+        // liga o post-processing e monto um Bloom por codigo pra o neon "acender"
+        var camData = _camera.GetUniversalAdditionalCameraData();
+        camData.renderPostProcessing = true;
+        var fxGO = new GameObject("PostFX");
+        var vol = fxGO.AddComponent<Volume>();
+        vol.isGlobal = true;
+        var profile = ScriptableObject.CreateInstance<VolumeProfile>();
+        vol.profile = profile;
+        var bloom = profile.Add<Bloom>(true);
+        bloom.intensity.value = 0.85f;  // brilho na medida, sem "lavar" a tela
+        bloom.threshold.value = 0.9f;   // so o que e bem brilhante (neon) acende
+        bloom.scatter.value = 0.6f;
+
         _camFollow = _camera.GetComponent<CameraFollow>();
         if (_camFollow == null) _camFollow = _camera.gameObject.AddComponent<CameraFollow>();
+
+        // particulazinhas de ambiente flutuando na tela pra dar clima
+        var amb = _camera.GetComponent<Ambience>();
+        if (amb == null) amb = _camera.gameObject.AddComponent<Ambience>();
+        amb.cam = _camera;
 
         // fundo da cidade preso na camera, com o SkyController fazendo o flicker neon
         var bg = new GameObject("Backdrop");
@@ -109,12 +134,28 @@ public class GameManager : MonoBehaviour
         float w = h * _camera.aspect;
         var bgSprite = _backdropSR.sprite;
         bg.transform.localScale = new Vector3(w / bgSprite.bounds.size.x, h / bgSprite.bounds.size.y, 1f);
+
+        // camada de cidade mais perto, com parallax (anda mais devagar que a camera = profundidade)
+        var near = new GameObject("CityNear");
+        near.transform.SetParent(_camera.transform);
+        near.transform.localPosition = new Vector3(0, -2.5f, 19f);
+        _nearSR = near.AddComponent<SpriteRenderer>();
+        _nearSR.sprite = SpriteFactory.CityNear(0);
+        _nearSR.sortingOrder = -60;
+        float nh = _camera.orthographicSize * 2f * 0.9f;
+        float nw = nh * _camera.aspect * 2.6f; // bem largo pra a borda nunca aparecer com o parallax
+        var nearSprite = _nearSR.sprite;
+        near.transform.localScale = new Vector3(nw / nearSprite.bounds.size.x, nh / nearSprite.bounds.size.y, 1f);
+        var par = near.AddComponent<Parallax>();
+        par.cam = _camera.transform;
+        par.factor = 0.12f;
     }
 
     // monta uma fase: apaga a anterior, constroi a nova e atualiza o HUD
     void LoadLevel(int index)
     {
         _levelIndex = index;
+        _checkpointLevel = index; // passou de fase = checkpoint novo
         _state = State.Playing;
 
         if (_container != null) Destroy(_container);
@@ -130,8 +171,9 @@ public class GameManager : MonoBehaviour
         _camFollow.SetBounds(info.minX, info.maxX, info.minY, info.maxY);
         _camFollow.SnapToTarget();
 
-        // cada fase tem um ceu de cor diferente
+        // cada fase tem um ceu de cor diferente (fundo + a camada de parallax)
         if (_backdropSR != null) _backdropSR.sprite = SpriteFactory.Background(index);
+        if (_nearSR != null) _nearSR.sprite = SpriteFactory.CityNear(index);
 
         _hud.SetLives(_lives);
         _hud.SetScore(_score);
@@ -163,6 +205,9 @@ public class GameManager : MonoBehaviour
 
     public void OnAmmoChanged(bool hasWeapon, int ammo) => _hud.SetAmmo(hasWeapon, ammo);
 
+    // tremor de tela. qualquer script pode chamar (dano, pisao, tiro no boss...)
+    public void Shake(float amount) { if (_camFollow != null) _camFollow.Shake(amount); }
+
     public void GainLife()
     {
         if (_lives < 5) _lives++; // nao deixo passar de 5 (a barra so tem 5)
@@ -182,6 +227,7 @@ public class GameManager : MonoBehaviour
     {
         if (_state != State.Playing) return;
         _state = State.Transition; // trava aqui pra nao tomar dano de tiro perdido no fim
+        Shake(0.7f);
         _score += 2000;
         _hud.SetScore(_score);
         _hud.ShowBoss(false);
@@ -195,6 +241,7 @@ public class GameManager : MonoBehaviour
         _lives--;
         _hud.SetLives(Mathf.Max(0, _lives));
         AudioManager.Instance.PlayHurt();
+        Shake(0.35f);
 
         if (_lives <= 0)
             GameOver();
@@ -241,7 +288,11 @@ public class GameManager : MonoBehaviour
         _state = State.GameOver;
         _player.SetControl(false);
         AudioManager.Instance.PlayGameOver();
-        _hud.ShowCenter("GAME OVER", "Pressione R para recomecar", new Color(1f, 0.4f, 0.4f));
+        // se tem checkpoint e nao ta na fase 1, avisa que volta pra fase do checkpoint
+        string sub = (_checkpoints && _checkpointLevel > 0)
+            ? "Pressione R para voltar pra Fase " + (_checkpointLevel + 1)
+            : "Pressione R para recomecar";
+        _hud.ShowCenter("GAME OVER", sub, new Color(1f, 0.4f, 0.4f));
         _hud.SetHint("");
     }
 
@@ -254,10 +305,19 @@ public class GameManager : MonoBehaviour
         _hud.SetHint("");
     }
 
-    void RestartGame()
+    // game over no facil/normal: volta pra fase do checkpoint, mantendo os pontos
+    void RestartFromCheckpoint()
+    {
+        _lives = _startLives;
+        LoadLevel(_checkpointLevel);
+    }
+
+    // recomeco do zero (dificil, ou quando ganha e quer jogar de novo)
+    void RestartFromStart()
     {
         _lives = _startLives;
         _score = 0;
+        _checkpointLevel = 0;
         LoadLevel(0);
     }
 
@@ -272,18 +332,52 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // R reinicia depois de morrer ou ganhar
-        if ((_state == State.GameOver || _state == State.Win) && Input.GetKeyDown(KeyCode.R))
-            RestartGame();
+        // tela de pausa
+        if (_state == State.Paused)
+        {
+            if (Input.GetKeyDown(KeyCode.Escape)) ResumeGame();
+            else if (Input.GetKeyDown(KeyCode.R)) { ResumeGame(); RestartFromCheckpoint(); }
+            else if (Input.GetKeyDown(KeyCode.M)) GoToMenu();
+            return;
+        }
+
+        // Esc pausa durante o jogo
+        if (_state == State.Playing && Input.GetKeyDown(KeyCode.Escape)) { PauseGame(); return; }
+
+        // R reinicia: no game over volta pro checkpoint (se tiver), na vitoria comeca tudo de novo
+        if (_state == State.GameOver && Input.GetKeyDown(KeyCode.R))
+        {
+            if (_checkpoints) RestartFromCheckpoint(); else RestartFromStart();
+        }
+        else if (_state == State.Win && Input.GetKeyDown(KeyCode.R))
+            RestartFromStart();
 
         if (Input.GetKeyDown(KeyCode.M))
             AudioManager.Instance.ToggleMute(); // M liga/desliga o som
+    }
 
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-#if !UNITY_EDITOR
-            Application.Quit();
-#endif
-        }
+    void PauseGame()
+    {
+        _state = State.Paused;
+        Time.timeScale = 0f; // congela tudo
+        _hud.ShowPause(true);
+    }
+
+    void ResumeGame()
+    {
+        _state = State.Playing;
+        Time.timeScale = 1f;
+        _hud.ShowPause(false);
+    }
+
+    void GoToMenu()
+    {
+        Time.timeScale = 1f;
+        _hud.ShowPause(false);
+        _hud.HideCenter();
+        _hud.ShowBoss(false);
+        if (_container != null) Destroy(_container);
+        _state = State.Menu;
+        _hud.ShowMenu(true);
     }
 }

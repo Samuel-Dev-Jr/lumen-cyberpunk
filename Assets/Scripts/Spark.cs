@@ -1,12 +1,14 @@
 using UnityEngine;
 
-// faiscazinha pra dar um feedback visual. ela anda, vai freando, some e se destroi sozinha
+// faiscazinha pra dar um feedback visual. ela anda, vai freando, some e se destroi sozinha.
+// uso pra coleta, explosao do boss e pras particulas de ambiente.
 public class Spark : MonoBehaviour
 {
     Vector2 _vel;
     float _life, _maxLife;
     SpriteRenderer _sr;
     Color _color;
+    float _baseA; // a transparencia que ela ja comeca, pra eu desbotar a partir dela
 
     public void Init(Vector2 vel, float life)
     {
@@ -14,6 +16,7 @@ public class Spark : MonoBehaviour
         _life = _maxLife = life;
         _sr = GetComponent<SpriteRenderer>();
         _color = _sr.color;
+        _baseA = _color.a;
     }
 
     void Update()
@@ -21,10 +24,10 @@ public class Spark : MonoBehaviour
         _life -= Time.deltaTime;
         if (_life <= 0f) { Destroy(gameObject); return; }
         transform.position += (Vector3)_vel * Time.deltaTime;
-        _vel *= 0.92f;
+        _vel *= 0.95f;
         if (_sr != null)
         {
-            _color.a = _life / _maxLife;
+            _color.a = (_life / _maxLife) * _baseA; // vai sumindo, mas sem estourar o brilho
             _sr.color = _color;
         }
     }

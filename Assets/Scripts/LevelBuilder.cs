@@ -60,6 +60,8 @@ public static class LevelBuilder
                     case 'F': MakeEnemy(x, y, parent, true); break;
                     case 'W': MakeWeapon(x, y, parent); break;
                     case 'L': MakeHeart(x, y, parent); break;
+                    case 'T': MakeTurret(x, y, parent); break;
+                    case 'm': MakeMovingPlatform(x, y, parent); break;
                     case 'B': MakeBoss(x, y, parent); info.hasBoss = true; break;
                     case 'X': MakeExit(x, y, parent); break;
                     case 'P':
@@ -209,5 +211,29 @@ public static class LevelBuilder
         col.isTrigger = true;
         col.radius = 0.45f;
         go.AddComponent<HeartPickup>();
+    }
+
+    static void MakeTurret(float x, float y, Transform parent)
+    {
+        var go = NewObj("Turret", x, y, parent, 4);
+        go.GetComponent<SpriteRenderer>().sprite = SpriteFactory.Turret();
+        var col = go.AddComponent<BoxCollider2D>();
+        col.isTrigger = true;
+        col.size = new Vector2(0.8f, 0.8f);
+        go.AddComponent<Turret>();
+    }
+
+    static void MakeMovingPlatform(float x, float y, Transform parent)
+    {
+        var go = NewObj("MovingPlatform", x, y, parent, 1);
+        var sr = go.GetComponent<SpriteRenderer>();
+        sr.sprite = SpriteFactory.Tile(true);
+        sr.color = new Color(1f, 0.55f, 0.95f); // puxa pro magenta pra diferenciar do chao fixo
+        go.transform.localScale = new Vector3(2f, 1f, 1f); // 2 tiles de largura
+        var rb = go.AddComponent<Rigidbody2D>();
+        rb.bodyType = RigidbodyType2D.Kinematic;
+        var col = go.AddComponent<BoxCollider2D>();
+        col.size = Vector2.one; // com a escala vira 2x1
+        go.AddComponent<MovingPlatform>();
     }
 }

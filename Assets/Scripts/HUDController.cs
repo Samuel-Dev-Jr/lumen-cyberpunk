@@ -15,7 +15,7 @@ public class HUDController : MonoBehaviour
     Text _score, _crystals, _banner, _center, _centerSub, _hint, _ammo, _bossLabel;
     Image[] _lifeSegs;
     Image _weaponIcon, _bossBarFill;
-    GameObject _bossBar, _ammoGroup, _menu;
+    GameObject _bossBar, _ammoGroup, _menu, _pause;
     Font _font;
     Transform _root;
     Coroutine _bannerCo;
@@ -92,9 +92,20 @@ public class HUDController : MonoBehaviour
         var mh = MakeText("mh", new Vector2(0.5f, 0.5f), new Vector2(0, -140), new Vector2(1100, 40), 22, TextAnchor.MiddleCenter, t);
         mh.text = "Escolha a dificuldade no teclado  -  J: atirar  Shift: correr  Espaco: pular"; mh.color = new Color(0.7f, 0.85f, 1f);
         _menu.SetActive(false);
+
+        // ---- tela de pausa ----
+        _pause = MakeGroup("pause");
+        var pt = _pause.transform;
+        var ptitle = MakeText("ptitle", new Vector2(0.5f, 0.5f), new Vector2(0, 90), new Vector2(1000, 80), 60, TextAnchor.MiddleCenter, pt);
+        ptitle.text = "PAUSA"; ptitle.color = NEON_CYAN;
+        MakeText("pp1", new Vector2(0.5f, 0.5f), new Vector2(0, 6), new Vector2(1000, 36), 28, TextAnchor.MiddleCenter, pt).text = "Esc  -  continuar";
+        MakeText("pp2", new Vector2(0.5f, 0.5f), new Vector2(0, -34), new Vector2(1000, 36), 28, TextAnchor.MiddleCenter, pt).text = "R  -  reiniciar a fase";
+        MakeText("pp3", new Vector2(0.5f, 0.5f), new Vector2(0, -74), new Vector2(1000, 36), 28, TextAnchor.MiddleCenter, pt).text = "M  -  voltar ao menu";
+        _pause.SetActive(false);
     }
 
     public void ShowMenu(bool v) => _menu.SetActive(v);
+    public void ShowPause(bool v) => _pause.SetActive(v);
 
     // um container que ocupa a tela toda, ai os filhos ancoram certinho
     GameObject MakeGroup(string name)

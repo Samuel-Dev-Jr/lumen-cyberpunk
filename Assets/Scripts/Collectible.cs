@@ -16,6 +16,8 @@ public class Collectible : MonoBehaviour
         GameManager.Instance.CollectCrystal(value);
         AudioManager.Instance.PlayCoin();
         SpawnFlash();
+        // mostra o "+100" subindo pra dar aquele feedback de pontos
+        FloatingText.Spawn(transform.position + Vector3.up * 0.4f, "+" + value, new Color(0.16f, 0.86f, 1f), transform.parent);
         Destroy(gameObject);
     }
 

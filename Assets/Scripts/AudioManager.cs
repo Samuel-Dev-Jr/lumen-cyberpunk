@@ -12,7 +12,7 @@ public class AudioManager : MonoBehaviour
     AudioSource _music; // a musica de fundo, fica em loop
 
     AudioClip _jump, _coin, _hurt, _stomp, _levelUp, _win, _over, _theme;
-    AudioClip _shoot, _pickup, _bossHit, _bossDie;
+    AudioClip _shoot, _pickup, _bossHit, _bossDie, _dash;
 
     public bool Muted { get; private set; }
 
@@ -44,6 +44,7 @@ public class AudioManager : MonoBehaviour
         _pickup = Sequence("pickup", new[] { 880f, 1320f, 1760f }, 0.05f, 0.5f);
         _bossHit = NoiseSweep("bosshit", 300f, 160f, 0.12f, 0.6f);
         _bossDie = Sequence("bossdie", new[] { 523f, 392f, 330f, 262f, 196f, 130f }, 0.16f, 0.6f);
+        _dash = Sweep("dash", 220f, 880f, 0.12f, 0.35f);
         _theme = BuildTheme();
     }
 
@@ -180,6 +181,7 @@ public class AudioManager : MonoBehaviour
     public void PlayPickup() => Play(_pickup, 0.6f);
     public void PlayBossHit() => Play(_bossHit, 0.6f);
     public void PlayBossDie() => Play(_bossDie, 0.8f);
+    public void PlayDash() => Play(_dash, 0.4f);
 
     public void StartMusic()
     {

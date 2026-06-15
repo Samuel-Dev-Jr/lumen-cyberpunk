@@ -45,11 +45,13 @@ public class Projectile : MonoBehaviour
             if (boss != null) { boss.Hit(1); Destroy(gameObject); return; }
             var enemy = other.GetComponent<Enemy>();
             if (enemy != null) { enemy.Hit(); Destroy(gameObject); return; }
+            var turret = other.GetComponent<Turret>();
+            if (turret != null) { turret.Hit(); Destroy(gameObject); return; }
         }
         else
         {
-            // tiro de inimigo: passa direto por outros inimigos e pelo boss, so machuca a Luna
-            if (other.GetComponent<Enemy>() != null || other.GetComponent<Boss>() != null) return;
+            // tiro de inimigo: passa direto por outros inimigos/torretas/boss, so machuca a Luna
+            if (other.GetComponent<Enemy>() != null || other.GetComponent<Boss>() != null || other.GetComponent<Turret>() != null) return;
             var p = other.GetComponent<PlayerController>();
             if (p != null) { p.TakeDamage(transform.position); Destroy(gameObject); return; }
         }

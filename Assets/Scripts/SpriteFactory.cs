@@ -197,6 +197,21 @@ public static class SpriteFactory
     }
     public static Sprite[] Drone() => Anim("drone", () => new[] { DroneFrame(0), DroneFrame(1) });
 
+    // torreta: fica parada no chao e atira no player. da pra destruir com tiro.
+    public static Sprite Turret()
+    {
+        if (_cache.TryGetValue("turret", out var s)) return s;
+        var b = NewBuf(S, S);
+        FillRect(b, S, S, 2, 1, 12, 4, METAL);      // base
+        FillRect(b, S, S, 2, 1, 12, 1, METAL_D);
+        Disc(b, S, S, 8f, 7f, 3.5f, METAL_L);       // cupula
+        FillRect(b, S, S, 6, 6, 5, 2, NRED);        // visor vermelho
+        FillRect(b, S, S, 10, 6, 6, 2, NYEL);       // cano apontando pro lado
+        FillRect(b, S, S, 2, 5, 1, 5, NMAG);        // trilho neon
+        FillRect(b, S, S, 13, 5, 1, 5, NMAG);
+        s = Make(b, S, S); _cache["turret"] = s; return s;
+    }
+
     // ========================= os espinhos que machucam =========================
     public static Sprite Spike()
     {
@@ -369,6 +384,32 @@ public static class SpriteFactory
             int x = rng.Next(w), y = rng.Next(h / 2, h);
             byte v = (byte)rng.Next(120, 220);
             Px(b, w, h, x, y, new Color32(v, v, 255, 200));
+        }
+        s = Make(b, w, h); _cache[key] = s; return s;
+    }
+
+    // cidade mais "de perto" (silhueta de predios mais escura, com o topo transparente).
+    // uso ela numa camada de parallax na frente do fundo, pra dar profundidade.
+    public static Sprite CityNear(int level)
+    {
+        string key = "citynear" + level;
+        if (_cache.TryGetValue(key, out var s)) return s;
+        var pal = SkyPalettes[Mathf.Clamp(level, 0, SkyPalettes.Length - 1)];
+        int w = 128, h = 40;
+        var b = NewBuf(w, h); // comeca tudo transparente (so os predios ficam solidos)
+        var rng = new System.Random(500 + level);
+        Color32 bld = new Color32(5, 6, 12, 255);
+        int x0 = 0;
+        while (x0 < w)
+        {
+            int bw = rng.Next(10, 20);
+            int bh = rng.Next(14, 34);
+            FillRect(b, w, h, x0, 0, bw, bh, bld);
+            for (int x = x0; x < x0 + bw && x < w; x++) Px(b, w, h, x, bh - 1, new Color32(pal[2].r, pal[2].g, pal[2].b, 160));
+            for (int wy = 2; wy < bh - 2; wy += 4)
+                for (int wx = x0 + 2; wx < x0 + bw - 1; wx += 4)
+                    if (rng.NextDouble() > 0.5) Px(b, w, h, wx, wy, pal[2]);
+            x0 += bw + 1;
         }
         s = Make(b, w, h); _cache[key] = s; return s;
     }
