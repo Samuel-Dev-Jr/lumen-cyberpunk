@@ -33,13 +33,14 @@
 <body>
 
 <div class="cover">
-  <div class="tag">UNIFECAF • GAME DEVELOPMENT</div>
+  <div class="tag">UNIFECAF - GAME DEVELOPMENT</div>
   <h1>LUMEN</h1>
   <div class="sub">Relatório Teórico - Plataforma 2D Cyberpunk na Unity</div>
   <div class="meta">
-    <strong>Aluno:</strong> Samuel Nunes<br>
+    <strong>Aluno:</strong> Samuel Sousa Nunes<br>
+    <strong>Professor/Tutor:</strong> Vitor Vieira<br>
     <strong>Disciplina:</strong> Game Development<br>
-    <strong>Engine:</strong> Unity 6 (6000.4) &nbsp;•&nbsp; <strong>Linguagem:</strong> C#<br>
+    <strong>Engine:</strong> Unity 6 (6000.4) - <strong>Linguagem:</strong> C#<br>
     <strong>Data:</strong> 14 de junho de 2026
   </div>
 </div>
@@ -57,16 +58,20 @@ tomei na prática. Fiz tudo na <strong>Unity 6</strong> com <strong>C#</strong>,
 projeto como peça de portfólio, mostrando o que aprendi de engine, lógica das mecânicas, design de
 níveis e experiência do usuário.</p>
 
+<p>Pra ser sincero, o jogo não saiu pronto de primeira. Comecei com uma ideia mais simples (um
+personagem só de luz numa caverna) e no meio do caminho resolvi mudar tudo pro tema cyberpunk, que
+combinou bem mais com a arte e o som que eu tava gerando. Cheguei até a testar uma personagem minha,
+a Luna, como protagonista, mas como eu só tinha uma imagem dela ela ficava totalmente parada, sem
+animação - aí preferi voltar pro personagem feito por código, que tem os quadros de andar, pular e
+escalar. No fim foi bastante tentativa e erro, e acho que foi essa parte que mais me ensinou.</p>
+
 <h3>Referência de mercado</h3>
-<p>Como exemplo concreto de solução já consolidada no mercado, tomamos <strong>Celeste</strong>
-(Maddy Makes Games, 2018), um dos platformers 2D mais aclamados da última década. Celeste é
-referência justamente porque eleva ao máximo aquilo que estudamos: <em>movimento responsivo</em>,
-<em>mecânica de escalada</em>, <em>dificuldade crescente cuidadosamente dosada</em> e
-<em>feedback audiovisual imediato</em>. Vários recursos de "game feel" usados em Celeste - como o
-<em>coyote time</em> e o <em>pulo de altura variável</em> - foram reproduzidos em Lumen, conforme
-detalhado na Seção 6. Outras referências clássicas do gênero incluem <em>Super Mario Bros.</em>
-(Nintendo, 1985), que fundou a gramática do platformer, e <em>Hollow Knight</em> (Team Cherry, 2017),
-referência de atmosfera e exploração vertical.</p>
+<p>Um jogo que eu usei muito de referência foi o <strong>Celeste</strong> (de 2018). Ele é um
+platformer 2D super conhecido e que tem um controle delicioso, e foi de onde tirei a ideia de usar
+coisas como o <em>coyote time</em> e o pulo de altura variável (que eu acabei colocando no Lumen,
+explico melhor na Seção 6). Também olhei o <em>Super Mario Bros.</em> (que basicamente inventou o
+gênero) e o <em>Hollow Knight</em>, mais pela atmosfera. Foi bom jogar e reparar nesses jogos antes
+de fazer o meu, pra entender o que deixa um platformer gostoso de jogar.</p>
 
 <h1>2. Princípios de jogos de plataforma 2D</h1>
 <p>No fundo, um jogo de plataforma 2D é um desafio de movimento e física: o personagem anda por um
@@ -204,6 +209,14 @@ vez de <em>tags</em>, o que torna o sistema mais robusto. O padrão <strong>Sing
 <code>GameManager</code> e no <code>AudioManager</code> dá acesso global e centralizado ao estado do
 jogo e ao áudio.</p>
 
+<h3>O que mais me deu trabalho</h3>
+<p>Não foi tudo tranquilo. A parte da <strong>física do pulo</strong> me fez perder um tempão até
+achar valores que deixassem o pulo gostoso (no começo ele tava fraco e eu não conseguia passar dos
+buracos). E teve um bug chato em que o personagem <strong>travava nas "emendas" entre um bloco de
+chão e outro</strong> - parava sozinho do nada. Demorei pra entender que era a colisão batendo nos
+cantos dos blocos; resolvi juntando o chão todo num colisor só (o <code>CompositeCollider2D</code>),
+e aí o movimento ficou liso. Foi onde eu mais aprendi sobre como a física 2D funciona na Unity.</p>
+
 <h1>7. Estratégias de inserção de áudio e efeitos sonoros</h1>
 <p>Todo o áudio de Lumen é <strong>sintetizado por código</strong> em tempo de execução, sem
 arquivos externos. O <code>AudioManager</code> gera formas de onda (principalmente onda quadrada,
@@ -254,18 +267,14 @@ gratuitos, o pacote <em>Kenney Platformer Pack</em> (kenney.nl, licença CC0) se
 recomendada e exigiria atribuição de crédito.</p>
 
 <h1>9. Conexão entre teoria e prática</h1>
-<p>A tabela a seguir resume como cada conceito teórico se materializou no código do jogo:</p>
-<table>
-  <tr><th>Conceito teórico</th><th>Aplicação prática em Lumen</th></tr>
-  <tr><td>Game feel / controle responsivo</td><td>Coyote time, jump buffer e gravidade variável no <code>PlayerController</code>.</td></tr>
-  <tr><td>Física de plataforma</td><td><code>Rigidbody2D</code> + detecção de chão por <code>OverlapBox</code>.</td></tr>
-  <tr><td>Progressão de dificuldade</td><td>Quatro mapas ASCII com elementos recombinados em densidade crescente.</td></tr>
-  <tr><td>Interatividade e feedback</td><td>Resposta visual (partículas), sonora (SFX) e sistêmica (vidas/respawn) imediata.</td></tr>
-  <tr><td>HUD</td><td>Canvas com vidas, cristais e pontuação atualizados por eventos.</td></tr>
-  <tr><td>Game loop</td><td>Uso correto de <code>Update</code>/<code>FixedUpdate</code>/<code>LateUpdate</code>.</td></tr>
-  <tr><td>Arquitetura de software</td><td>Singletons, responsabilidade única e abordagem data-driven.</td></tr>
-  <tr><td>Áudio</td><td>Síntese procedural de trilha e efeitos coerentes com a estética.</td></tr>
-</table>
+<p>No fim das contas, deu pra ver que cada coisa que estudei tinha um lugar no código. O tal do
+"game feel" virou o coyote time e o pulo de altura variável que fiz no <code>PlayerController</code>.
+A física de plataforma virou o <code>Rigidbody2D</code> com a checagem de chão. A progressão de
+dificuldade virou os mapas em texto (ASCII), com os elementos ficando mais densos a cada uma das
+cinco fases. O feedback virou as partículas, os sons e o tremor de tela. E a teoria de game loop
+apareceu na hora de separar o que vai no <code>Update</code> (entrada) e o que vai no
+<code>FixedUpdate</code> (física). Foi bem legal fazer essa ponte entre o que eu li e o que eu
+realmente codei.</p>
 
 <h2>Conclusão</h2>
 <p>Fazendo o Lumen eu percebi, na prática, que um jogo de plataforma 2D legal de jogar depende menos

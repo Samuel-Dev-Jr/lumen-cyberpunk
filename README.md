@@ -1,7 +1,8 @@
 # 🌆 Lumen - Plataforma 2D Cyberpunk
 
 > Projeto da disciplina **Game Development** - UniFECAF
-> Desenvolvido em **Unity 6 (6000.4)** com **C#** por **Samuel Nunes**
+> Desenvolvido em **Unity 6 (6000.4)** com **C#** por **Samuel Sousa Nunes**
+> Professor/Tutor: **Vitor Vieira**
 
 **Lumen** é um jogo de plataforma 2D de estética **cyberpunk** (neon synthwave). Você controla
 um pequeno *netrunner* de luz que precisa atravessar os níveis de uma megacidade subterrânea:
